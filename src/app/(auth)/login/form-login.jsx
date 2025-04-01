@@ -4,12 +4,17 @@ import { Button } from "@/app/components/ui/button";
 import { InputField } from "@/app/components/ui/input-field";
 import { useErrorsHooks } from "@/app/hooks/error-message-hook";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Modal from "./esqueceu-senha-modal";
 
 export default function LoginForm() {
   const router = useRouter();
 
   const { disableErrorMessage, errorMessage, updateErrorMessage } =
     useErrorsHooks();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [email, setEmail] = useState("");
 
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +27,16 @@ export default function LoginForm() {
       return false;
     }
     return true;
+  }
+
+  function handleForgotPassword(event) {
+    event.preventDefault();
+    setIsModalOpen(true);
+  }
+
+  function handlePasswordReset() {
+    console.log("Email para recuperação:", email);
+    setIsModalOpen(false);
   }
 
   function validatePassword(password) {
@@ -42,24 +57,23 @@ export default function LoginForm() {
     const { email, password } = Object.fromEntries(formData);
 
     if (!validateEmail(email) || !validatePassword(password)) return;
-
+    console.log ("cheguei aqui")
     disableErrorMessage();
   }
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
-     
-      <InputField 
-      label={"Email"}
+      <InputField
+        label={"Email"}
         type="email"
-        name={"usuario"}
+        name={"email"}
         required={true}
         placeholder={"usuario@email.com"}
         error={errorMessage?.title == "email" ? errorMessage.message : null}
       />
-      
-      <InputField 
-      label={"Senha"}
+
+      <InputField
+        label={"Senha"}
         type="password"
         name={"password"}
         required={true}
@@ -68,25 +82,28 @@ export default function LoginForm() {
       />
 
       <div className="flex flex-col items-center justify-center gap-3">
-
-      <Button rounded="w-[400px] h-[50px]">
-        <span>ENTRAR</span>
-      </Button>
-      <button className=" border-b w-fit">
-        Esqueceu a senha?
-      </button>
-      <div className="flex w-full gap-2 items-center">
-        <hr className="w-full border-[#858585]"/>
-        <span className="text-[#141414]">
-          ou
-        </span>
-        <hr className="w-full border-[#858585]"/>
+        <Button rounded="w-[400px] h-[50px]">
+          <span>ENTRAR</span>
+        </Button>
+        <button className=" border-b w-fit" onClick={handleForgotPassword}>Esqueceu a senha? </button >
+        <div className="flex w-full gap-2 items-center">
+          <hr className="w-full border-[#858585]" />
+          <span className="text-[#141414]">ou</span>
+          <hr className="w-full border-[#858585]" />
+        </div>
+        <Button rounded="w-[400px] h-[50px]" alternative={true}>
+          <span>Criar Conta</span>
+        </Button>
       </div>
-      <Button rounded="w-[400px] h-[50px]" alternative={true}>
-        <span>Criar Conta</span>
-      </Button>
-      </div>
-     
+      {isModalOpen && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)} 
+          onSubmit={handlePasswordReset} 
+          email={email} 
+          setEmail={setEmail}
+        />
+      )}
     </form>
   );
 }
