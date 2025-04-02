@@ -5,7 +5,9 @@ import { InputField } from "@/app/components/ui/input-field";
 import { useErrorsHooks } from "@/app/hooks/error-message-hook";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Modal from "./esqueceu-senha-modal";
+import ModalEsqueceuSenha from "./(esqueceu-senha)/esqueceu-senha-modal";
+import Modal from "@/app/components/layout/modal";
+import ModalCadastro from "./cadastro-modal";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function LoginForm() {
     useErrorsHooks();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalRegister, setIsModalRegister] = useState(false);
   const [email, setEmail] = useState("");
 
   function validateEmail(email) {
@@ -30,8 +33,11 @@ export default function LoginForm() {
   }
 
   function handleForgotPassword(event) {
-    event.preventDefault();
     setIsModalOpen(true);
+  }
+
+  function handleRegister(event){
+    setIsModalRegister(true);
   }
 
   function handlePasswordReset() {
@@ -60,6 +66,7 @@ export default function LoginForm() {
     console.log ("cheguei aqui")
     disableErrorMessage();
   }
+  
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
@@ -92,17 +99,20 @@ export default function LoginForm() {
           <hr className="w-full border-[#858585]" />
         </div>
         <Button rounded="w-[400px] h-[50px]" alternative={true}>
-          <span>Criar Conta</span>
+          <span onClick={handleRegister}>Criar Conta</span>
         </Button>
       </div>
       {isModalOpen && (
-        <Modal
+        <ModalEsqueceuSenha
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)} 
-          onSubmit={handlePasswordReset} 
-          email={email} 
-          setEmail={setEmail}
+          onClose={() => setIsModalOpen(false)}
         />
+      )}
+     {isModalRegister &&(
+       <ModalCadastro
+       isOpen={isModalRegister}
+       onClose={() => setIsModalRegister(false)}
+       /> 
       )}
     </form>
   );
