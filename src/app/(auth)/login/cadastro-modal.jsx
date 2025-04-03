@@ -1,8 +1,8 @@
 "use client";
 
-import Modal from "@/app/components/layout/modal";
-import { Button } from "@/app/components/ui/button";
-import { InputField } from "@/app/components/ui/input-field";
+import Modal from "@/components/layout/modal";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import { useState } from "react";
 
 export default function ModalCadastro({ isOpen, onClose }) {

@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/app/components/ui/button";
-import { InputField } from "@/app/components/ui/input-field";
-import { useErrorsHooks } from "@/app/hooks/error-message-hook";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
+import { useErrorsHooks } from "@/hooks/error-message-hook";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ModalEsqueceuSenha from "./(esqueceu-senha)/esqueceu-senha-modal";
-import Modal from "@/app/components/layout/modal";
+import Modal from "@/components/layout/modal";
 import ModalCadastro from "./cadastro-modal";
 
 export default function LoginForm() {
