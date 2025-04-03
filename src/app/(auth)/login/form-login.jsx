@@ -68,7 +68,7 @@ export default function LoginForm() {
   }
 
   return (
-    <form className="w-full" onSubmit={handleSubmit}>
+    <div className="w-full">
       <InputField
         label={"Email"}
         type="email"
@@ -88,7 +88,7 @@ export default function LoginForm() {
       />
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <Button rounded="w-[400px] h-[50px]">
+        <Button onClick={handleSubmit} rounded="w-[400px] h-[50px]">
           <span>ENTRAR</span>
         </Button>
         <button
@@ -119,6 +119,6 @@ export default function LoginForm() {
           onClose={() => setIsModalRegister(false)}
         />
       )}
-    </form>
+    </div>
   );
 }
