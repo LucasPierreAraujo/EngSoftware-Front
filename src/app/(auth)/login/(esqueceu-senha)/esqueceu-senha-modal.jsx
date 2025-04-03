@@ -15,16 +15,32 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
   }
 
   const [email, setEmail] = useState("");
+  const [error, setError] = useState(null);
   const [showVerifyCode, setShowVerifyCode] = useState(false);
   const [showNewPasswordModal, setShowNewPasswordModal] = useState(false);
 
+  function validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
   function handleSubmit() {
-    if (email) {
-      window.alert(`Email enviado para: ${email}`);
-      setShowVerifyCode(true);
-    } else {
-      window.alert("Por favor, insira um email válido.");
+    if (!email) {
+      setError("O e-mail é obrigatório.");
+      return;
     }
+
+    if (!validateEmail(email)) {
+      setError({
+        field: "email",
+        message: "Insira um e-mail válido.",
+      });
+      return;
+    }
+
+    setError(null);
+    window.alert(`Email enviado para: ${email}`);
+    setShowVerifyCode(true);
   }
 
   function handleCodeVerified() {
@@ -39,15 +55,17 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
 
   function closeNewPasswordModal() {
     setShowNewPasswordModal(false);
-    setShowVerifyCode(false); 
-    onClose()
+    setShowVerifyCode(false);
+    onClose();
   }
-  
 
   return (
     <Modal onClose={onClose}>
       {showNewPasswordModal ? (
-        <ModalNovaSenha isOpen={showNewPasswordModal} onClose={closeNewPasswordModal} />
+        <ModalNovaSenha
+          isOpen={showNewPasswordModal}
+          onClose={closeNewPasswordModal}
+        />
       ) : showVerifyCode ? (
         <ModalConfirmeCodigo
           isOpen={showVerifyCode}
@@ -55,7 +73,7 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
           onCodeVerified={handleCodeVerified}
         />
       ) : (
-        <div >
+        <div>
           <h2 className="text-3xl font-bold text-[#2A2567]">
             Esqueceu sua senha?
           </h2>
@@ -68,13 +86,16 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
               value={email}
               onChange={(e) => setEmail(e)}
               placeholder="usuario@email.com"
+              error={error && error.field == "email" ? error.message : null}
             />
+
             <p className="text-[#141414]">
               Um código de acesso será enviado para o seu email.
             </p>
             <p className="text-[#141414]">Fique atento!</p>
-            <div className="flex flex-col items-center justify-center ">
+            <div className="flex flex-col items-center justify-center">
               <Button
+                type="button"
                 rounded="w-[400px]"
                 className="bg-[#2D3748] text-white h-full"
                 onClick={handleSubmit}
@@ -87,4 +108,4 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
       )}
     </Modal>
   );
-}  
+}

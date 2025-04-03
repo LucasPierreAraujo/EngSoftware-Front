@@ -36,7 +36,7 @@ export default function LoginForm() {
     setIsModalOpen(true);
   }
 
-  function handleRegister(event){
+  function handleRegister(event) {
     setIsModalRegister(true);
   }
 
@@ -46,10 +46,10 @@ export default function LoginForm() {
   }
 
   function validatePassword(password) {
-    if (password.length < 1) {
+    if (password.length < 6) {
       updateErrorMessage({
         title: "password",
-        message: "a senha deve conter pelo menos 8 caracteres",
+        message: "a senha deve conter pelo menos  caracteres",
       });
       return false;
     }
@@ -63,10 +63,9 @@ export default function LoginForm() {
     const { email, password } = Object.fromEntries(formData);
 
     if (!validateEmail(email) || !validatePassword(password)) return;
-    console.log ("cheguei aqui")
+    console.log("cheguei aqui");
     disableErrorMessage();
   }
-  
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
@@ -92,13 +91,19 @@ export default function LoginForm() {
         <Button rounded="w-[400px] h-[50px]">
           <span>ENTRAR</span>
         </Button>
-        <button className=" border-b w-fit" onClick={handleForgotPassword}>Esqueceu a senha? </button >
+        <button
+          type="button"
+          className=" border-b w-fit"
+          onClick={handleForgotPassword}
+        >
+          Esqueceu a senha?{" "}
+        </button>
         <div className="flex w-full gap-2 items-center">
           <hr className="w-full border-[#858585]" />
           <span className="text-[#141414]">ou</span>
           <hr className="w-full border-[#858585]" />
         </div>
-        <Button rounded="w-[400px] h-[50px]" alternative={true}>
+        <Button type="button" rounded="w-[400px] h-[50px]" alternative={true}>
           <span onClick={handleRegister}>Criar Conta</span>
         </Button>
       </div>
@@ -108,11 +113,11 @@ export default function LoginForm() {
           onClose={() => setIsModalOpen(false)}
         />
       )}
-     {isModalRegister &&(
-       <ModalCadastro
-       isOpen={isModalRegister}
-       onClose={() => setIsModalRegister(false)}
-       /> 
+      {isModalRegister && (
+        <ModalCadastro
+          isOpen={isModalRegister}
+          onClose={() => setIsModalRegister(false)}
+        />
       )}
     </form>
   );
