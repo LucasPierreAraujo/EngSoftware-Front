@@ -1,3 +1,8 @@
+'use client'
+import DonutChart from "@/components/ui/donut-chart";
+import WebsiteTrafficChart from "@/components/ui/donut-chart";
+import Image from "next/image";
+
 export default function page(){
     return (
         <div>
@@ -11,6 +16,8 @@ export default function page(){
             <p>
                 Outra coisa, não precisa importar o header.... o layout que esta na raiz do (private) vai ser puxado para todas as pastas que forem criada em private 
             </p>
+
+
         </div>
     )
 }
