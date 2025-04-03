@@ -2,6 +2,7 @@ export function ProgressBar({
   backgroundColor = "#76789F",
   color = "#2A2567",
   progress = 0,
+  transparent = false
 }) {
   const progressBarFillStyle = {
     width: `${progress}%`,
@@ -10,8 +11,12 @@ export function ProgressBar({
   const progressBarStyle = {
     backgroundColor: backgroundColor,
   };
+  const bgBase = (transparent ? 'transparent' : '#FFFFFF')
+  const baseStyle = { 
+    backgroundColor: bgBase
+  }
   return (
-    <div className="w-full h-fit rounded-xl bg-white flex items-center justify-between py-2 px-4 gap-5">
+    <div className="w-full h-fit rounded-xl flex items-center justify-between py-2 px-4 gap-5" style={baseStyle}>
       <div
         className="w-full h-2 bg-[#76789F] rounded-full overflow-hidden"
         style={progressBarStyle}
