@@ -1,4 +1,5 @@
 import Image from "next/image";
+import TeamTable from "./components/TeamTable";
 
 export default function Home() {
   return (
