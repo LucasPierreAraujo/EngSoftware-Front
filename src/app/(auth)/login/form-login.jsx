@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ModalEsqueceuSenha from "./(esqueceu-senha)/esqueceu-senha-modal";
 import Modal from "@/components/layout/modal";
-import ModalCadastro from "./cadastro-modal";
+import ModalCadastro from "./(cadastro)/cadastro-modal";
 
 export default function LoginForm() {
   const router = useRouter();
