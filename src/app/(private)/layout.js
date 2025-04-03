@@ -1,21 +1,5 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "../globals.css";
 import HeaderBase from "@/components/layout/header-base";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: "--font-inter"
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "Create Next App",
@@ -25,7 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html>
-      <body className={`${inter.className}`}>
+      <body>
         <HeaderBase/>
         {children}
       </body>
