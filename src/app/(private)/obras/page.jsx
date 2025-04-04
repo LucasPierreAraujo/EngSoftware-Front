@@ -1,5 +1,5 @@
-import { LinhaObra } from "@/components/ui/linha-obra";
-import HeaderObras from "./header-obras";
+import { LinhaObra } from "./(components)/linha-obra";
+import HeaderObras from "./(components)/header-obras";
 
 export default function TabelaObras() {
   const obras = [
