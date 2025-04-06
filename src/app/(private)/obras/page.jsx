@@ -1,113 +1,53 @@
-import { LinhaObra } from "./(components)/linha-obra";
-import HeaderObras from "./(components)/header-obras";
+"use client";
+import { obras } from "./(components)/data";
+import { useSearchParams } from "next/navigation";
+import Pagination from "@/components/ui/pagination";
+import {
+  TabelaObrasAndamento,
+  TabelaObrasConcluidas,
+  TabelaObrasArquivadas,
+} from "./(components)/tabelas-especificas";
 
-export default function TabelaObras() {
-  const obras = [
-    {
-      id: 1,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 0,
-    },
-    {
-      id: 2,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 10,
-    },
-    {
-      id: 3,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 80,
-    },
-    {
-      id: 4,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 10,
-    },
-    {
-      id: 5,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 40,
-    },
-    {
-      id: 6,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 10,
-    },
-    {
-      id: 7,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 40,
-    },
-    {
-      id: 8,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 10,
-    },
-    {
-      id: 9,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 30,
-    },
-    {
-      id: 10,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 20,
-    },
-    {
-      id: 11,
-      nome: "Praça FAP",
-      responsavel: "José da Silva",
-      dataInicio: "23/05/2025",
-      andamento: 53,
-    },
-  ];
+export default function Page() {
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const currentStatus = searchParams.get("status") || "todas";
+  // Filtragem das obras por status
+  const obrasEmAndamento = obras.filter((obra) => !obra.dataConclusao);
+  const obrasConcluidas = obras.filter(
+    (obra) => obra.dataConclusao && !obra.dataArquivo
+  );
+  const obrasArquivadas = obras.filter((obra) => obra.dataArquivo);
+
+  // Lógica de paginação
+  const OBRAS_POR_PAGINA = 15;
+  const indiceInicial = (currentPage - 1) * OBRAS_POR_PAGINA;
+  const indiceFinal = indiceInicial + OBRAS_POR_PAGINA;
+
+  // Seleciona a lista correta com base no status
+  let listaAtual = obras;
+  console.log(currentStatus);
+  if (currentStatus === "Concluida") listaAtual = obrasConcluidas;
+  if (currentStatus === "Arquivada") listaAtual = obrasArquivadas;
+  if (currentStatus === "Em Andamento") listaAtual = obrasEmAndamento;
+
+  const obrasPaginadas = listaAtual.slice(indiceInicial, indiceFinal);
+  const totalPages = Math.ceil(listaAtual.length / OBRAS_POR_PAGINA);
 
   return (
-    <>
-      <h1 className="text-4xl text-azul-forte my-4">Todas as Obras</h1>
-      <HeaderObras />
-      <div className="m-auto">
-        <div className="grid text-cinza">
-          <div className="flex justify-between items-center gap-4 w-full font-bold uppercase text-[12px] p-4">
-            <div className="w-full">Nome da Obra</div>
-            <div className="w-full">Responsável</div>
-            <div className="w-full">Data de Início</div>
-            <div className="w-full">Andamento</div>
-            <div className="w-full">Ações</div>
-          </div>
-          <div className="w-full">
-            {obras.map((obra) => (
-              <LinhaObra
-                nome={obra.nome}
-                responsavel={obra.responsavel}
-                andamento={obra.andamento}
-                dataInicio={obra.dataInicio}
-                key={obra.id}
-              />
-            ))}
-          </div>
-        </div>
+    <div className="m-auto">
+      {(currentStatus === "todas" || currentStatus == "Em Andamento") && (
+        <TabelaObrasAndamento obras={obrasPaginadas} />
+      )}
+      {currentStatus === "Concluida" && (
+        <TabelaObrasConcluidas obras={obrasPaginadas} />
+      )}
+      {currentStatus === "Arquivada" && (
+        <TabelaObrasArquivadas obras={obrasPaginadas} />
+      )}
+      <div className="flex justify-center mt-4">
+        <Pagination totalPages={totalPages} />
       </div>
-    </>
+    </div>
   );
 }

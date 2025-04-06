@@ -1,53 +1,45 @@
-import Pagination from "@/components/ui/pagination";
+"use client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import LinkHeaderObra from "./link-header-obra";
 
 export default function HeaderObras() {
+  const searchParams = useSearchParams();
+  const currentStatus = searchParams.get("status") || "todas";
+  const links = [
+    { href: "/new", text: "+ Nova Obra" },
+    { href: "", text: "Todas as Obras" },
+    { href: "?status=Em Andamento", text: "Em Andamento" },
+    { href: "?status=Concluida", text: "Concluídas" },
+    { href: "?status=Arquivada", text: "Arquivadas" },
+  ];
+
+  const title = () => {
+    if (currentStatus == "todas") {
+      return "Todas as Obras";
+    }
+    const current = links.find((link) => link.href.includes(currentStatus));
+    if (!current) {
+      return "Indefinido";
+    }
+    return current.text;
+  };
+
   return (
     <header className="w-full my-4">
+      <h1 className="text-4xl text-azul-forte my-4">{title()}</h1>
       <div className="flex items-center gap-6 justify-between w-full">
         <ul className="flex gap-2 items-center text-preto">
-          <li>
-            <Link
-              className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] min-w-20 flex items-center justify-center"
-              href={"/obras/new"}
-            >
-              + Nova Obra
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] min-w-20 flex items-center justify-center bg-amarelo"
-              href={"/obras"}
-            >
-              Todas as Obras
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] min-w-20 flex items-center justify-center"
-              href={"/obras?status=Em+Andamento"}
-            >
-              Em Andamento
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] min-w-20 flex items-center justify-center"
-              href={"/obras?status=Concluida"}
-            >
-              Concluídas
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] min-w-20 flex items-center justify-center"
-              href={"/obras?status=Arquivada"}
-            >
-              Arquivadas
-            </Link>
-          </li>
+          {links.map((link) => (
+            <li key={link.href}>
+              <LinkHeaderObra
+                href={link.href}
+                text={link.text}
+                currentStatus={currentStatus}
+              />
+            </li>
+          ))}
         </ul>
-        <Pagination totalPages={2} currentPage={1} />
       </div>
     </header>
   );

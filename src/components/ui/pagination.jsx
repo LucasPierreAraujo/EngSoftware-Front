@@ -93,10 +93,10 @@ function PaginationNumber({
     position,
 }) {
     const className = clsx(
-        "py-2 px-4 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] flex items-center justify-center",
-        {
-            "bg-amarelo": isActive,
-        }
+      "py-2 px-4 hover:bg-azul-mortinho hover:text-white  rounded-full border border-[#858585] flex items-center justify-center",
+      {
+        "bg-amarelo text-white border-0": isActive,
+      }
     );
 
     return isActive || position === "middle" ? (
