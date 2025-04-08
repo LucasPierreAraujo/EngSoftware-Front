@@ -10,7 +10,7 @@ export function Button({
   
     return (
       <button
-        className={`${rounded} p-2 rounded-3xl transition-all duration-300`}
+        className={`${rounded} px-3 py-2 rounded-3xl transition-all duration-300`}
         style={{ backgroundColor, color: textColor }}
         onClick={onClick}
         type={type}
