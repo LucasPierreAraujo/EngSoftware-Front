@@ -10,7 +10,6 @@ import { useState } from "react";
 
 export default function RelatorioObraModal() {
   const [data, setData] = useState("");
-  const [selectedOption, setSelectedOption] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [tmax, setTmax] = useState("");
   const [tmin, setTmin] = useState("");
@@ -142,7 +141,7 @@ export default function RelatorioObraModal() {
             />
           </div>
           <div>
-            <TextArea label={"Observações"}/>
+            <TextArea label={"Observações"} />
           </div>
         </div>
         <div>
