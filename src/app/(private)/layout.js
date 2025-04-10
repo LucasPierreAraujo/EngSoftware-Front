@@ -1,3 +1,4 @@
+import HeaderMobile from "@/components/layout/header-mobile";
 import "../globals.css";
 import HeaderBase from "@/components/layout/header-base";
 
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         <HeaderBase/>
+        <HeaderMobile/>
         {children}
       </body>
     </html>

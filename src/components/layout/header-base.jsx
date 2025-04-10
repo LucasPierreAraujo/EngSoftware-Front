@@ -5,7 +5,7 @@ import Notification from "./notification";
 export default function HeaderBase() {
     
   return (
-    <header className="flex justify-between items-center w-full px-4 py-2">
+    <header className="hidden justify-between items-center w-full px-4 py-2  md:flex">
       <div className="flex items-center gap-2">
         <figure className="flex items-center justify-center p-5 w-11 h-11 rounded-full bg-azul-forte"></figure>
         <ul className="flex gap-2 items-center">
