@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "lucide-react": "^0.487.0",
     "next": "15.2.3",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
