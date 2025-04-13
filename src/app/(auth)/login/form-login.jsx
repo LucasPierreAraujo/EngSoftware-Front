@@ -5,6 +5,8 @@ import { InputField } from "@/components/ui/input-field";
 import { useErrorsHooks } from "@/hooks/error-message-hook";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { authService } from "@/services/authService";
+import {toast} from "sonner"
 import ModalEsqueceuSenha from "./(esqueceu-senha)/esqueceu-senha-modal";
 import Modal from "@/components/layout/modal";
 import ModalCadastro from "./(cadastro)/cadastro-modal";
@@ -49,7 +51,7 @@ export default function LoginForm() {
     if (password.length < 6) {
       updateErrorMessage({
         title: "password",
-        message: "a senha deve conter pelo menos  caracteres",
+        message: "a senha deve conter pelo menos 6 caracteres",
       });
       return false;
     }
@@ -63,12 +65,24 @@ export default function LoginForm() {
     const { email, password } = Object.fromEntries(formData);
 
     if (!validateEmail(email) || !validatePassword(password)) return;
-    console.log("cheguei aqui");
+
+    try {
+      await authService.login(email, password);
+      router.push('/dashboard'); // ou para onde desejar redirecionar após login
+    } catch (error) {
+      console.error("Erro ao logar: " + error.message);
+      toast.error("Erro ao fazer login", {
+        description: "Email ou senha incorretos. Por favor tente novamente.",
+        style: {
+          backgroundColor: "#dc2626"
+        }
+      })
+    }
     disableErrorMessage();
   }
 
   return (
-    <div className="w-full">
+    <form className="w-full" onSubmit={handleSubmit}>
       <InputField
         label={"Email"}
         type="email"
@@ -88,7 +102,7 @@ export default function LoginForm() {
       />
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <Button onClick={handleSubmit} rounded="w-[400px] h-[50px]">
+        <Button rounded="w-[400px] h-[50px]">
           <span>ENTRAR</span>
         </Button>
         <button
@@ -119,6 +133,6 @@ export default function LoginForm() {
           onClose={() => setIsModalRegister(false)}
         />
       )}
-    </div>
+    </form>
   );
 }

@@ -1,6 +1,8 @@
 import HeaderMobile from "@/components/layout/header-mobile";
 import "../globals.css";
 import HeaderBase from "@/components/layout/header-base";
+import { TokenRefreshProvider } from "@/providers/token-refresh-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata = {
   title: "Create Next App",
@@ -11,9 +13,12 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <HeaderBase/>
-        <HeaderMobile/>
-        {children}
+        <HeaderBase />
+        <HeaderMobile />
+        <TokenRefreshProvider>
+          {children}
+        </TokenRefreshProvider>
+        <Toaster/>
       </body>
     </html>
   );

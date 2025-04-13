@@ -9,8 +9,9 @@
             "request": "launch",
             "name": "Iniciar o Chrome em relação a localhost",
             "url": "http://localhost:3001",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMaps": true,
+            "trace": true
         }
     ]
 }
