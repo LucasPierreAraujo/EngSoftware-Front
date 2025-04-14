@@ -3,7 +3,7 @@
 export function SelectOne({ label, inputStyle = "form", name, error, onChange, onBlur, options = [] }) {
 
     const style = {
-        form: 'mt-1 block w-full px-3 py-[10.5px] border border bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm'
+        form: 'mt-1 block w-full px-3 py-[10.5px] border border-black rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm'
     }
         
     return (
