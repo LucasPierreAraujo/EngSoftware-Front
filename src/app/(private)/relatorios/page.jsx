@@ -3,127 +3,147 @@
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import Image from "next/image";
+import RelatorioObraModal from "./modal/relatorio-obra-modal";
+import { useEffect, useState } from "react";
+import RelatoriosModal from "./modal/relatorios";
 
 export default function page() {
-    const reports = [
-        {
-          id: 1,
-          registro: "001-2025",
-          responsavel: "João da Silva",
-          dataEnvio: "31/03/2025",
-          obra: "Praça FAP",
-        },
-        {
-            id: 2,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 3,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 4,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 5,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 6,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 7,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 8,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 9,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 10,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 11,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-          {
-            id: 12,
-            registro: "001-2025",
-            responsavel: "João da Silva",
-            dataEnvio: "31/03/2025",
-            obra: "Praça FAP",
-          },
-        
-      ];
-  return (
-    <div className="mx-5">
-      <div className="w-full flex justify-between h-full items-center py-2">
-        <h2 className="w-full flex-1  font-bold text-[#2A2567] text-3xl">
-          Relatórios
-        </h2>
+  const [showModal, setShowModal] = useState(false);
+  const [showDraft, setShowDraft] = useState(false);
+  const [draftData, setDraftData] = useState(null);
+  const [showProblemModal, setShowProblemModal] = useState(false);
 
-        <button className="w-fit flex gap-2 items-center bg-azul-forte text-white px-4 py-1 rounded-3xl">
+  useEffect(() => {
+    if (showDraft) {
+      const saved = localStorage.getItem("relatorioRascunho");
+      if (saved) {
+        setDraftData(JSON.parse(saved));
+        setShowModal(true);
+      }
+    }
+  }, [showDraft]);
+
+  const reports = [
+    {
+      id: 1,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 2,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 3,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 4,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 5,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 6,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 7,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 8,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 9,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 10,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 11,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+    {
+      id: 12,
+      registro: "001-2025",
+      responsavel: "João da Silva",
+      dataEnvio: "31/03/2025",
+      obra: "Praça FAP",
+    },
+  ];
+  return (
+    <div className="p-5 space-y-8">
+      
+      <div className="w-full flex justify-between items-center">
+        <h2 className="font-bold text-[#2A2567] text-3xl">Relatórios</h2>
+        <button className="flex gap-2 items-center bg-azul-forte text-white px-4 py-2 rounded-3xl hover:opacity-90 transition-all duration-300">
           <span>Extrair Relatório</span>
-          <Image src="/icons/Download.png" alt="Download" width={17} height={17} />
+          <Image
+            src="/icons/Download.png"
+            alt="Download"
+            width={17}
+            height={17}
+          />
         </button>
       </div>
 
-      <div className="flex w-full gap-2 mt-4">
-        <Button>
+      <div className="flex flex-wrap gap-3">
+      <Button onClick={() => setShowModal(true)}>
           <span>Adicionar Relatório</span>
         </Button>
 
-        <Button alternative={true}>
+        <Button alternative={true} onClick={() => setShowDraft(true)}>
           <span>Rascunhos</span>
         </Button>
 
-        <button className="bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl transition-all duration-300">
+        <button onClick={() => setShowProblemModal(true)} className="bg-[#E43C3C] text-white px-4 py-2 rounded-3xl hover:opacity-90 transition-all duration-300">
           Relatar Problema
         </button>
-
       </div>
-      <div className="w-full">
-        <table className="w-full text-left border-collapse ">
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
           <thead>
             <tr>
-               <th className="p-4 font-bold text-sm">REGISTRO DO RELATÓRIO</th>
+              <th className="p-4 font-bold text-sm">REGISTRO DO RELATÓRIO</th>
               <th className="p-4 font-bold text-sm">RESPONSÁVEL</th>
               <th className="p-4 font-bold text-sm">DATA DE ENVIO</th>
               <th className="p-4 font-bold text-sm">OBRA</th>
@@ -132,7 +152,7 @@ export default function page() {
           </thead>
           <tbody>
             {reports.map((report) => (
-              <tr key={report.id}>
+              <tr key={report.id} className="border-t">
                 <td className="p-4 text-sm">{report.registro}</td>
                 <td className="p-4 text-sm">{report.responsavel}</td>
                 <td className="p-4 text-sm">{report.dataEnvio}</td>
@@ -145,9 +165,22 @@ export default function page() {
           </tbody>
         </table>
       </div>
-      <div className="w-full flex justify-center items-center p-2">
-          <Pagination totalPages={10} />
-     </div>
+
+      <div className="flex justify-center pt-4">
+        <Pagination totalPages={10} />
+      </div>
+      {showModal && (
+        <RelatorioObraModal
+          onClose={() => {
+            setShowModal(false);
+            setShowDraft(false);
+          }}
+          draft={draftData}
+        />
+      )}
+      {showProblemModal && (
+        <RelatoriosModal onClose={() => setShowProblemModal(false)} />
+      )}
     </div>
   );
 }
