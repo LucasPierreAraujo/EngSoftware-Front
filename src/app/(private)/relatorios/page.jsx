@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import Image from "next/image";
-import RelatorioObraModal from "./relatorio-obra-modal";
+import RelatorioObraModal from "./modal/relatorio-obra-modal";
 import { useEffect, useState } from "react";
-import RelatoriosModal from "./relatorios";
+import RelatoriosModal from "./modal/relatorios";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
