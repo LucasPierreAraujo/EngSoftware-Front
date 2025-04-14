@@ -101,7 +101,7 @@ export default function page() {
 
         <button className="w-fit flex gap-2 items-center bg-azul-forte text-white px-4 py-1 rounded-3xl">
           <span>Extrair Relatório</span>
-          <Image src="/icons/down.png" alt="Download" width={17} height={17} />
+          <Image src="/icons/Download.png" alt="Download" width={17} height={17} />
         </button>
       </div>
 
