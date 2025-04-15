@@ -142,16 +142,15 @@ export default function NovaFase({ onClose }) {
         </div>
 
         <div className="flex items-center justify-end w-full gap-3">
-          <Button onClick={handleSubmit}>
-            <span>Enviar</span>
-          </Button>
-
           <button
             className=" bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl transition-all duration-300"
             onClick={onClose}
           >
             Cancelar
           </button>
+          <Button onClick={handleSubmit}>
+            <span>Enviar</span>
+          </Button>
         </div>
       </div>
     </Modal>

@@ -3,7 +3,7 @@
 export function TextArea({ label, inputStyle = "form", name, error, type = "text", value, onChange, onBlur, placeholder }) {
 
     const style = {
-        form: 'mt-1 block w-full px-3 py-2 border  rounded-md shadow-sm  focus:border-orange-500 sm:text-sm h-24 resize-none'
+        form: 'mt-1 block w-full px-3 py-2 border border-black  rounded-md shadow-sm  sm:text-sm h-24 resize-none'
     }
         
     return (

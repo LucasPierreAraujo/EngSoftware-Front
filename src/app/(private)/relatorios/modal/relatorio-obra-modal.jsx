@@ -57,9 +57,10 @@ export default function RelatorioObraModal({ onClose, draft }) {
     if (!atrasos) newErrors.atrasos = "Atrasos é obrigatório";
     if (!visitas) newErrors.visitas = "Visitas técnicas é obrigatório";
     if (!acidente) newErrors.acidente = "Acidente de trabalho é obrigatório";
-    if (!problemas) newErrors.problemas = "Problemas operacionais é obrigatório";
-    if (!tempo) newErrors.tempo = "Tempo é obrigatório"; 
-    if (!obra) newErrors.obra = "Obra é obrigatória"; 
+    if (!problemas)
+      newErrors.problemas = "Problemas operacionais é obrigatório";
+    if (!tempo) newErrors.tempo = "Tempo é obrigatório";
+    if (!obra) newErrors.obra = "Obra é obrigatória";
     return newErrors;
   };
 
@@ -69,7 +70,7 @@ export default function RelatorioObraModal({ onClose, draft }) {
       setErrors(newErrors);
       return;
     }
-    
+
     const dados = {
       data,
       responsavel,
@@ -97,7 +98,7 @@ export default function RelatorioObraModal({ onClose, draft }) {
       setErrors(newErrors);
       return;
     }
-    
+
     localStorage.removeItem("relatorioRascunho");
     alert("Relatório enviado com sucesso!");
     onClose();
@@ -275,18 +276,19 @@ export default function RelatorioObraModal({ onClose, draft }) {
         </div>
 
         <div className="flex items-center justify-end w-full gap-2 mt-4">
-          <Button onClick={handleEnviar}>
-            <span>Enviar</span>
-          </Button>
-          <Button alternative={true} onClick={handleSalvarRascunho}>
-            <span>Salvar Rascunho</span>
-          </Button>
           <button
             onClick={handleLimpar}
             className="bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl"
           >
             Limpar
           </button>
+
+          <Button alternative={true} onClick={handleSalvarRascunho}>
+            <span>Salvar Rascunho</span>
+          </Button>
+          <Button onClick={handleEnviar}>
+            <span>Enviar</span>
+          </Button>
         </div>
       </div>
     </Modal>

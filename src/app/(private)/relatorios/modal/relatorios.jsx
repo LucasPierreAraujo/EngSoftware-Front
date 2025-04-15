@@ -22,7 +22,7 @@ export default function RelatoriosModal({ onClose }) {
     const selected = e.target.files[0];
     if (selected && selected.type === "application/pdf") {
       setFile(selected);
-      setErrors({ ...errors, file: "" }); 
+      setErrors({ ...errors, file: "" });
     } else {
       alert("Por favor, selecione um arquivo PDF.");
       e.target.value = null;
@@ -46,7 +46,6 @@ export default function RelatoriosModal({ onClose }) {
     let valid = true;
     const newErrors = { local: "", responsavel: "", descreva: "" };
 
-    
     if (!local) {
       newErrors.local = "Campo 'Local' é obrigatório.";
       valid = false;
@@ -63,7 +62,7 @@ export default function RelatoriosModal({ onClose }) {
     }
 
     if (!valid) {
-      setErrors(newErrors); 
+      setErrors(newErrors);
       return;
     }
 
@@ -74,8 +73,7 @@ export default function RelatoriosModal({ onClose }) {
       file,
     };
 
-
-    onClose(); 
+    onClose();
   };
 
   return (
@@ -160,9 +158,6 @@ export default function RelatoriosModal({ onClose }) {
         </div>
 
         <div className="flex items-center justify-end w-full gap-2 pt-4">
-          <Button onClick={handleSend}>
-            <span>Enviar</span>
-          </Button>
           <button
             type="button"
             onClick={handleClear}
@@ -170,6 +165,9 @@ export default function RelatoriosModal({ onClose }) {
           >
             Limpar
           </button>
+          <Button onClick={handleSend}>
+            <span>Enviar</span>
+          </Button>
         </div>
       </div>
     </Modal>
