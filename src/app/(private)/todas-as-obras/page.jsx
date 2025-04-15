@@ -88,7 +88,7 @@ import { useState } from "react";
         <div className="p-5 space-y-8">
         <div className="flex items-center justify-between w-full">
             <h2 className="font-bold text-[#2A2567] text-3xl">Praça Fap</h2>
-            <ProjetoInfo />
+            <ProjetoInfo  />
         </div>
 
         <div className="flex items-center justify-between w-full">
