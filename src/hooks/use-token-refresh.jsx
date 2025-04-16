@@ -7,7 +7,7 @@ export function useTokenRefresh() {
     let intervalId;
 
     const checkAndRefreshToken = async () => {
-      if (tokenService.isTokenExpiring()) {
+      if (tokenService.getToken() && tokenService.isTokenExpiring()) {
         try {
           console.log("atualizando token");
           await authService.refresh();
