@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import LinkHeaderObra from "./link-header-obra";
 
 export default function HeaderObras() {
   const searchParams = useSearchParams();
-  const currentStatus = searchParams.get("status") || "todas";
+  const pathName = usePathname();
+  const currentStatus = pathName.includes('new') ? 'new' : searchParams.get("status") || "todas";
+  
   const links = [
     { href: "/new", text: "+ Nova Obra" },
     { href: "", text: "Todas as Obras" },
@@ -18,7 +20,7 @@ export default function HeaderObras() {
     if (currentStatus == "todas") {
       return "Todas as Obras";
     }
-    const current = links.find((link) => link.href.includes(currentStatus));
+    const current = links.find((link) => link.href.includes(currentStatus) || link.text.includes(pathName));
     if (!current) {
       return "Indefinido";
     }
