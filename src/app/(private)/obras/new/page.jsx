@@ -87,6 +87,15 @@ export default function Page() {
     }
   };
 
+  const handleReset = (event) => {
+    event.preventDefault();
+    const form = event.currentTarget.form;
+    form.reset();
+    setErrors({});
+    setValid(true);
+
+  }
+
   return (
     <form onSubmit={handleSubmit} className="h-full">
       <div className="flex gap-8 h-full flex-col md:flex-row">
@@ -195,6 +204,7 @@ export default function Page() {
               rounded="w-[150px] h-[40px]"
               type="button"
               background={"var(--color-vermelho)"}
+              onClick={handleReset}
             >
               Limpar
             </Button>
@@ -202,6 +212,9 @@ export default function Page() {
               rounded="w-[150px] h-[40px]"
               type="button"
               alternative={true}
+              onClick={() => {
+                router.push("/obras");
+              }}
             >
               Voltar
             </Button>
