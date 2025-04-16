@@ -28,7 +28,7 @@ export const tokenService = {
     const token = this.getToken();
     if (!token) return false;
     const decoded = this.decodeToken(token)
-    if (!decoded || !decoded.ext) return true;
+    if (!decoded || !decoded.exp) return true;
     const expirationTime = decoded.exp * 1000;
     const currentTime = Date.now();
     const timeRemaining = expirationTime - currentTime;

@@ -1,11 +1,22 @@
 "use client";
 
+import clsx from 'clsx';
+
 export function InputField({ label, required, inputStyle = "login", name, error, type = "text", value, onChange, onBlur, placeholder }) {
 
     const style = {
-        login: 'border  p-2 rounded-sm w-full border-[#141414]  mt-1 bg-w',
-        form: 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm'
-    }
+        login: clsx("border  p-2 rounded-sm w-full mt-1 bg-w", {
+            "border-red-300": error,
+            "border-[#141414]" : !error
+      }),
+      form: clsx(
+        "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+        {
+          "border-red-300": error,
+          "border-gray-300": !error,
+        }
+      ),
+    };
         
     return (
         <div className="w-full">

@@ -5,7 +5,7 @@ export function ProgressBar({
   transparent = false
 }) {
   const progressBarFillStyle = {
-    width: `${progress}%`,
+    width: `${progress ?? 0}%`,
     backgroundColor: color,
   };
   const progressBarStyle = {
@@ -26,7 +26,7 @@ export function ProgressBar({
           style={progressBarFillStyle}
         ></div>
       </div>
-      <span>{progress.toFixed(0)}%</span>
+      <span>{(progress ?? 0).toFixed(0)}%</span>
     </div>
   );
 }

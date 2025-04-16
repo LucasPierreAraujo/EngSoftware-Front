@@ -7,46 +7,63 @@ import {
   TabelaObrasConcluidas,
   TabelaObrasArquivadas,
 } from "./(components)/tabelas-especificas";
+import { useEffect, useState } from "react";
+import { obrasService } from "@/services/obrasService";
+import { toast } from "sonner";
 
 export default function Page() {
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
   const currentStatus = searchParams.get("status") || "todas";
-  // Filtragem das obras por status
-  const obrasEmAndamento = obras.filter((obra) => !obra.dataConclusao);
-  const obrasConcluidas = obras.filter(
-    (obra) => obra.dataConclusao && !obra.dataArquivo
-  );
-  const obrasArquivadas = obras.filter((obra) => obra.dataArquivo);
+  const [obras, setObras] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [paginationInfo, setPaginationInfo] = useState({
+    total: 0,
+    lastPage: 1,
+  });
 
-  // Lógica de paginação
-  const OBRAS_POR_PAGINA = 15;
-  const indiceInicial = (currentPage - 1) * OBRAS_POR_PAGINA;
-  const indiceFinal = indiceInicial + OBRAS_POR_PAGINA;
+  useEffect(() => {
+    const fetchObras = async () => {
+      try {
+        setLoading(true);
+        const response = await obrasService.list(currentStatus, currentPage);
+        setObras(response.data);
+        setPaginationInfo({
+          total: response.total,
+          lastPage: response.last_page,
+        });
+      } catch (error) {
+        console.error("Erro ao carregar obras: ", error);
+        toast.error(error.message, {
+          description: "Erro ao carregar obras",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchObras();
+  }, [currentStatus, currentPage]);
 
-  // Seleciona a lista correta com base no status
-  let listaAtual = obras;
-  console.log(currentStatus);
-  if (currentStatus === "Concluida") listaAtual = obrasConcluidas;
-  if (currentStatus === "Arquivada") listaAtual = obrasArquivadas;
-  if (currentStatus === "Em Andamento") listaAtual = obrasEmAndamento;
-
-  const obrasPaginadas = listaAtual.slice(indiceInicial, indiceFinal);
-  const totalPages = Math.ceil(listaAtual.length / OBRAS_POR_PAGINA);
+  if (loading) {
+    return <div className="text-center p-4">Carregando...</div>;
+  }
 
   return (
     <div className="m-auto">
       {(currentStatus === "todas" || currentStatus == "Em Andamento") && (
-        <TabelaObrasAndamento obras={obrasPaginadas} />
+        <TabelaObrasAndamento obras={obras} />
       )}
       {currentStatus === "Concluida" && (
-        <TabelaObrasConcluidas obras={obrasPaginadas} />
+        <TabelaObrasConcluidas obras={obras} />
       )}
       {currentStatus === "Arquivada" && (
-        <TabelaObrasArquivadas obras={obrasPaginadas} />
+        <TabelaObrasArquivadas obras={obras} />
       )}
       <div className="flex justify-center mt-4">
-        <Pagination totalPages={totalPages} />
+        <Pagination totalPages={paginationInfo.lastPage} />
       </div>
     </div>
   );
