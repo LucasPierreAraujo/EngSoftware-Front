@@ -62,5 +62,15 @@ export const api = {
     });
     return handleResponse(response);
   },
+
+  async update(endpoint, id, data) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}/${id}`,{
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+    },
+  
   
 };

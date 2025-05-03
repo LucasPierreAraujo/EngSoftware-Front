@@ -54,7 +54,7 @@ export default function HeaderMobile() {
           <li className="w-full">
             <Link
               className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border w-full flex items-center justify-center"
-              href={"/"}
+              href={"/dashboard"}
             >
               Dashboard
             </Link>
@@ -70,7 +70,7 @@ export default function HeaderMobile() {
           <li className="w-full">
             <Link
               className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border w-full flex items-center justify-center"
-              href={"/relatorio"}
+              href={"/relatorios"}
             >
               Relatórios
             </Link>

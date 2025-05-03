@@ -30,7 +30,7 @@ export default function HeaderBase() {
           <li>
             <Link
               className="px-3 py-2 hover:bg-azul-mortinho hover:text-white  rounded-full border min-w-20 flex items-center justify-center"
-              href={"/relatorio"}
+              href={"/relatorios"}
             >
               Relatórios
             </Link>

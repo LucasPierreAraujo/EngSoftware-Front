@@ -5,6 +5,7 @@ export function SelectOne({
   inputStyle = "form",
   name,
   error,
+  value,
   onChange,
   onBlur,
   options = [],
@@ -19,6 +20,7 @@ export function SelectOne({
       <select
         className={style[inputStyle]}
         name={name}
+        {...(value ? {value: value} : null)}
         defaultValue=""
         {...(onChange
           ? { onChange: (event) => onChange(event.target.value) }

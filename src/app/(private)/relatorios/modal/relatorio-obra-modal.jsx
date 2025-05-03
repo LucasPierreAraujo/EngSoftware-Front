@@ -5,14 +5,19 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
 import { SelectOne } from "@/components/ui/select-one";
 import { TextArea } from "@/components/ui/text-area";
+import { obrasService } from "@/services/obrasService";
+import { reportService } from "@/services/reportService";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-export default function RelatorioObraModal({ onClose, draft }) {
+export default function RelatorioObraModal({ onClose, draft, report = null }) {
+  console.log(report);
   const [data, setData] = useState("");
+  const [id, setId] = useState(null);
   const [responsavel, setResponsavel] = useState("");
   const [tmax, setTmax] = useState("");
   const [tmin, setTmin] = useState("");
+  const [observacaoTempo, setObservacaoTempo] = useState("");
   const [observacao, setObservacao] = useState("");
   const [servico, setServico] = useState("");
   const [etapa, setEtapa] = useState("");
@@ -26,7 +31,30 @@ export default function RelatorioObraModal({ onClose, draft }) {
 
   const [errors, setErrors] = useState({});
 
+  const [listObra, setListObra] = useState([]);
+  const [listResponsavel, setListResponsavel] = useState([
+    { value: 1, name: "Usuário padrão" },
+  ]);
+
+  const climaOptions = [
+    { value: 1, name: "frio" },
+    { value: 2, name: "quente" },
+  ];
+
+  async function fecthObra() {
+    let response = await obrasService.list();
+    const option = response.data.map((item) => {
+      return {
+        value: item.id,
+        name: item.nome,
+      };
+    });
+    setListObra(option);
+  }
+
   useEffect(() => {
+    fecthObra();
+
     if (draft) {
       setData(draft.data || "");
       setResponsavel(draft.responsavel || "");
@@ -39,11 +67,27 @@ export default function RelatorioObraModal({ onClose, draft }) {
       setVisitas(draft.visitas || "");
       setAcidente(draft.acidente || "");
       setProblemas(draft.problemas || "");
-      setArquivo(draft.arquivo || null);
       setTempo(draft.tempo || "");
       setObra(draft.obra || "");
     }
-  }, [draft]);
+    if (report) {
+      setData(report.data_do_registro || "");
+      setResponsavel(report.colaborador.id || "");
+      setTmax(report.tempo_climatico_t_max || "");
+      setTmin(report.tempo_climatico_t_min || "");
+      setObservacao(report.tempo_climatico_observacao || "");
+      setServico(report.servico_executado || "");
+      setEtapa(report.etapa_frente || "");
+      setAtrasos(report.atrasos || "");
+      setVisitas(report.visitas_tecnicas || "");
+      setAcidente(report.acidente || "");
+      setProblemas(report.problemas_operacionais || "");
+      setTempo(report.tempo_climatico || "");
+      setObra(report.obra.id);
+    }
+  }, []);
+
+  console.log({idObra: obra})
 
   const validateFields = () => {
     const newErrors = {};
@@ -92,25 +136,30 @@ export default function RelatorioObraModal({ onClose, draft }) {
     onClose();
   };
 
-  const handleEnviar = () => {
-    const newErrors = validateFields();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+  async function handleEnviar(){
+
+    const store = await reportService.store({
+      data_do_registro: data,
+      id_obra: obra,
+      id_responsavel: responsavel,
+      descricao: observacao,
+      tempo_climatico: tempo,
+      tempo_climatico_t_max: tmax,
+      tempo_climatico_t_min: tmin,
+      tempo_climatico_observacao: observacaoTempo,
+      servico_executado: servico,
+      etapa_frente: etapa,
+      atrasos: atrasos,
+      visitas_tecnicas: visitas,
+      acidente: acidente,
+      problemas_operacionais: problemas
+    })
+
+    if(!store){
+      console.error("Deu ruim major! volta para casa!")
     }
 
-    localStorage.removeItem("relatorioRascunho");
-    alert("Relatório enviado com sucesso!");
     onClose();
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
-      setArquivo(file.name);
-    } else {
-      alert("Apenas arquivos PDF são permitidos.");
-    }
   };
 
   const handleLimpar = () => {
@@ -132,6 +181,39 @@ export default function RelatorioObraModal({ onClose, draft }) {
     setErrors({});
   };
 
+  async function handleUpdate(){
+    console.log(report.id)
+
+    const response = await reportService.update(report.id, {
+      data_do_registro: data,
+      id_obra: obra,
+      id_responsavel: responsavel,
+      descricao: observacao,
+      tempo_climatico: tempo,
+      tempo_climatico_t_max: tmax,
+      tempo_climatico_t_min: tmin,
+      tempo_climatico_observacao: observacaoTempo,
+      servico_executado: servico,
+      etapa_frente: etapa,
+      atrasos: atrasos,
+      visitas_tecnicas: visitas,
+      acidente: acidente,
+      problemas_operacionais: problemas
+    })
+
+    if(response.message == "Registro atualizado com sucesso."){
+      onClose();
+      return
+    }
+
+    window.alert('Manobra cega!')
+  }
+
+  const IncidentesOcorrencias = [
+    {value: 'não', name: 'não'},
+    {value: 'sim', name: 'sim'},
+  ]
+
   return (
     <Modal onClose={onClose}>
       <div>
@@ -151,15 +233,15 @@ export default function RelatorioObraModal({ onClose, draft }) {
           <SelectOne
             label={"Obra"}
             value={obra}
-            onChange={setObra}
+            onChange={(e) => setObra(e)}
+            options={listObra}
             error={errors.obra}
           />
-          <InputField
-            label="Responsável"
-            type="text"
-            name="responsavel"
+          <SelectOne
+            label={"Responsável"}
             value={responsavel}
-            onChange={setResponsavel}
+            onChange={(e) => setResponsavel(e)}
+            options={listResponsavel}
             error={errors.responsavel}
           />
         </div>
@@ -170,6 +252,7 @@ export default function RelatorioObraModal({ onClose, draft }) {
             label={"Tempo"}
             value={tempo}
             onChange={setTempo}
+            options={climaOptions}
             error={errors.tempo}
           />
           <InputField
@@ -189,9 +272,9 @@ export default function RelatorioObraModal({ onClose, draft }) {
           <InputField
             label="Observação"
             type="text"
-            value={observacao}
-            onChange={setObservacao}
-            error={errors.observacao}
+            value={observacaoTempo}
+            onChange={setObservacaoTempo}
+            error={null}
           />
         </div>
 
@@ -252,44 +335,39 @@ export default function RelatorioObraModal({ onClose, draft }) {
           onChange={setObservacao}
           error={errors.observacao}
         />
+        {report ? (
+          <div className="flex items-center justify-end w-full gap-2 mt-4">
+            <button
+              onClick={onClose}
+              className="bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl"
+            >
+              Cancelar e sair
+            </button>
 
-        <div className="flex flex-col mt-3">
-          <span>Anexar Documentos (PDF)</span>
-          <label className="flex items-center w-fit bg-[#2D3748] text-[#F5F5F5] px-7 py-2 rounded-sm cursor-pointer gap-2">
-            Anexar
-            <Image
-              src="/icons/anexar.png"
-              alt="Anexar"
-              width={14}
-              height={14}
-            />
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              hidden
-            />
-          </label>
-          {arquivo && (
-            <span className="text-sm mt-1 text-gray-600">{arquivo}</span>
-          )}
-        </div>
+            <button
+              onClick={handleUpdate}
+              className="bg-[#2A2567] text-[#F5F5F5] px-3 py-2 rounded-3xl"
+            >
+              Salvar alterações
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-end w-full gap-2 mt-4">
+            <button
+              onClick={handleLimpar}
+              className="bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl"
+            >
+              Limpar
+            </button>
 
-        <div className="flex items-center justify-end w-full gap-2 mt-4">
-          <button
-            onClick={handleLimpar}
-            className="bg-[#E43C3C] text-[#F5F5F5] px-3 py-2 rounded-3xl"
-          >
-            Limpar
-          </button>
-
-          <Button alternative={true} onClick={handleSalvarRascunho}>
-            <span>Salvar Rascunho</span>
-          </Button>
-          <Button onClick={handleEnviar}>
-            <span>Enviar</span>
-          </Button>
-        </div>
+            <Button alternative={true} onClick={handleSalvarRascunho}>
+              <span>Salvar Rascunho</span>
+            </Button>
+            <Button onClick={handleEnviar}>
+              <span>Enviar</span>
+            </Button>
+          </div>
+        )}
       </div>
     </Modal>
   );
