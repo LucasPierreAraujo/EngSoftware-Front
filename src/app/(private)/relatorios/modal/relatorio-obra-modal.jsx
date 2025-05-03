@@ -182,7 +182,6 @@ export default function RelatorioObraModal({ onClose, draft, report = null }) {
   };
 
   async function handleUpdate(){
-    console.log(report.id)
 
     const response = await reportService.update(report.id, {
       data_do_registro: data,
