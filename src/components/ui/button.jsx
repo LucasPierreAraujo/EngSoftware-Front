@@ -10,6 +10,7 @@ export function Button({
 }) {
   const backgroundColor = background ? background : (alternative ? "#2D3748" : "#2A2567");
   const textColor = color ? color : (alternative ? "#F7FAFC" : "#FFFFFF");
+  
 
   return (
     <button

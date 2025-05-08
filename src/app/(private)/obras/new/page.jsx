@@ -77,9 +77,13 @@ export default function Page() {
       }, {});
     try {
       const createClient = await clienteService.store(clientData.nome, clientData);
+      const responseClient = await createClient.json();
+      console.log(responseClient)
+      // Aqui ele não ta pegando o id do cliente...
       const idCliente = createClient.id;
       obraData.cliente_id = idCliente;
       const createObra = await obrasService.store(obraData);
+      console.log(createObra)
       router.push("/obras");
     } catch (error) {
       console.log(error);

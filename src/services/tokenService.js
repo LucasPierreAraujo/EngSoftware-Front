@@ -1,15 +1,26 @@
 'use client'
 
+const isLocalStorageAvailable = () => {
+  try {
+    return typeof window !== 'undefined' && window.localStorage;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const tokenService = {
   getToken() {
+    if (!isLocalStorageAvailable()) return null;
     return localStorage.getItem("token");
   },
 
   setToken(token) {
+    if (!isLocalStorageAvailable()) return;
     localStorage.setItem("token", token);
   },
 
   removeToken() {
+    if (!isLocalStorageAvailable()) return;
     localStorage.removeItem("token");
   },
 

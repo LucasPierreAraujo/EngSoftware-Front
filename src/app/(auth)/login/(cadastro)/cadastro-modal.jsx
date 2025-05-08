@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
 import { useState } from "react";
 import { useErrorsHooks } from "@/hooks/error-message-hook";
+import { SelectOne } from "@/components/ui/select-one";
+import { authService } from "@/services/authService";
 
 export default function ModalCadastro({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -18,6 +20,7 @@ export default function ModalCadastro({ isOpen, onClose }) {
   const [senha, setSenha] = useState("");
   const [confirmeSenha, setConfirmeSenha] = useState("");
   const [cargo, setCargo] = useState("");
+  const [telefone, setTelefone] = useState("");
 
   function capitalizeFirstLetter(text) {
     return text
@@ -62,14 +65,6 @@ export default function ModalCadastro({ isOpen, onClose }) {
       return false;
     }
 
-    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(cargo)) {
-      updateErrorMessage({
-        title: "cargo",
-        message: "O cargo deve conter apenas letras.",
-      });
-      return false;
-    }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       updateErrorMessage({
@@ -98,9 +93,41 @@ export default function ModalCadastro({ isOpen, onClose }) {
     return true;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!validateForm()) return;
-    window.alert("Cadastro concluído com sucesso!");
+    const data = {
+      name: nome,
+      cpf: cpfCnpj,
+      email: email,
+      phone: telefone,
+      password: senha,
+      type: cargo,
+    };
+    const response = await authService.register(data);
+
+    if(response.status == 422){
+      const data = await response.json();
+      if(data.errors?.email){
+        
+        return updateErrorMessage({
+          title: "email",
+          message: "Este email já está cadastrado"
+        });
+      }
+
+      if(data.errors?.phone){
+        
+        return updateErrorMessage({
+          title: "telefone", 
+          message: "Este telefone já está cadastrado"
+        });
+      }
+    }
+
+    if(response.status != 201){
+      window.alert("Erro ao cadastrar usuário!");
+    }
+
     onClose();
   }
 
@@ -110,6 +137,7 @@ export default function ModalCadastro({ isOpen, onClose }) {
       <p className="text-sm text-[#141414]">
         Crie sua conta para acessar o sistema
       </p>
+
 
       <InputField
         label="CPF ou CNPJ"
@@ -141,6 +169,15 @@ export default function ModalCadastro({ isOpen, onClose }) {
       />
 
       <InputField
+        label="Telefone"
+        type="text"
+        value={telefone}
+        onChange={(e) => setTelefone(e)}
+        placeholder="Digite seu telefone"
+        error={errorMessage?.title === "telefone" ? errorMessage.message : null}
+      />
+
+      <InputField
         label="Senha"
         type="password"
         value={senha}
@@ -160,17 +197,26 @@ export default function ModalCadastro({ isOpen, onClose }) {
         }
       />
 
-      <InputField
+      <SelectOne
         label="Cargo"
-        type="text"
+        options={[
+          {
+            value: "1",
+            name: "Engenheiro",
+          },
+          {
+            value: "2",
+            name: "Arquiteto",
+          },
+        ]}
         value={cargo}
         onChange={(e) =>
           setCargo(
-            capitalizeFirstLetter(e.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, ""))
+            capitalizeFirstLetter(e)
           )
         }
         placeholder="Digite seu cargo"
-        error={errorMessage?.title === "cargo" ? errorMessage.message : null}
+        // error={errorMessage?.title === "cargo" ? errorMessage.message : null}
       />
 
       <Button

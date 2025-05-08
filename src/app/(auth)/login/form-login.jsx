@@ -20,6 +20,8 @@ export default function LoginForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalRegister, setIsModalRegister] = useState(false);
   const [email, setEmail] = useState("");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [errorSubmit, setErrorSubmit] = useState(false);
 
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,6 +62,7 @@ export default function LoginForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setLoadingSubmit(true);
 
     const formData = new FormData(event.currentTarget);
     const { email, password } = Object.fromEntries(formData);
@@ -70,16 +73,20 @@ export default function LoginForm() {
       await authService.login(email, password);
       router.push('/dashboard'); // ou para onde desejar redirecionar após login
     } catch (error) {
+     
       console.error("Erro ao logar: " + error.message);
-      toast.error("Erro ao fazer login", {
-        description: "Email ou senha incorretos. Por favor tente novamente.",
-        style: {
-          backgroundColor: "#dc2626"
-        }
-      })
+
+      setErrorSubmit({
+        title: "email",
+        message:
+          "Email ou senha incorretos. Por favor tente novamente.",
+      });
+      setLoadingSubmit(false);
     }
     disableErrorMessage();
+    setLoadingSubmit(false);
   }
+  console.log(errorSubmit)
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
@@ -89,7 +96,7 @@ export default function LoginForm() {
         name={"email"}
         required={true}
         placeholder={"usuario@email.com"}
-        error={errorMessage?.title == "email" ? errorMessage.message : null}
+        error={errorMessage?.title == "email" ? errorMessage.message : null || errorSubmit?.title == "email" ? errorSubmit.message : null}
       />
 
       <InputField
@@ -102,7 +109,7 @@ export default function LoginForm() {
       />
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <Button rounded="w-[400px] h-[50px]">
+        <Button disabled={loadingSubmit} rounded={`w-[400px] h-[50px] ${loadingSubmit ? "opacity-50" : ""}`}>
           <span>ENTRAR</span>
         </Button>
         <button

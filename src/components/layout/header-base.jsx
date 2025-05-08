@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import Notification from "./notification";
+import LogOut from "../../app/(auth)/log-out";
 
 export default function HeaderBase() {
-    
+  
   return (
     <header className="hidden justify-between items-center w-full px-4 py-2  md:flex">
       <div className="flex items-center gap-2">
@@ -54,9 +55,8 @@ export default function HeaderBase() {
         </ul>
       </div>
       <div className="flex items-center gap-2 relative">
-        <button className="p-2 border rounded-full relative hover:bg-zinc-200 cursor-pointer">
-          <Image alt="" src={"/icons/gear.png"} width={20} height={20} />
-        </button>
+        <LogOut/>
+
         <Notification/>
       </div>
     </header>

@@ -9,6 +9,7 @@ const API_BASE_URL =
 async function handleResponse(response) {
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
+        console.log(error);
         throw new ApiError(
           error.message || "Erro na requisição",
           response.status,
@@ -43,8 +44,9 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
+    console.log(response)
     return handleResponse(response);
-    },
+  },
   
   async patch(endpoint, id, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}/${id}`, {
@@ -53,7 +55,7 @@ export const api = {
       body: JSON.stringify(data),
     });
     return handleResponse(response);
-    },
+  },
   
   async delete(endpoint, id) {
     const response = await fetch(`${API_BASE_URL}${endpoint}/${id}`, {
@@ -70,7 +72,5 @@ export const api = {
       body: JSON.stringify(data),
     });
     return handleResponse(response);
-    },
-  
-  
+  },
 };
