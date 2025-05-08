@@ -2,59 +2,68 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import AdicionarColaborador from "./(components)/AdicionarColaborador.jsx";
+import { colaboradorService } from "@/services/colaboradorService";
 
 export default function EquipePage() {
   const [menuAberto, setMenuAberto] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const [colaboradores, setColaboradores] = useState([]);
 
-  const [colaboradores, setColaboradores] = useState([
-    { nome: "Nome do Colaborador", cargo: "Pedreiro", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Desativado" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Desativado" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Ativo" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Desativado" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Desativado" },
-    { nome: "Nome do Colaborador", cargo: "Servente", setor: "Construção", status: "Desativado" },
-  ]);
+  // Buscar colaboradores do backend
+  useEffect(() => {
+    async function fetchColaboradores() {
+      try {
+        const data = await colaboradorService.listar();
+        setColaboradores(data);
+      } catch (error) {
+        console.error("Erro ao carregar colaboradores", error);
+      }
+    }
+
+    fetchColaboradores();
+  }, []);
 
   const toggleMenu = (index) => {
     setMenuAberto(menuAberto === index ? null : index);
   };
 
-  const alterarStatus = (index, novoStatus) => {
-    const atualizados = [...colaboradores];
-    atualizados[index].status = novoStatus;
-    setColaboradores(atualizados);
-    setMenuAberto(null); // fecha o menu após ação
+  const alterarStatus = async (id, novoStatus) => {
+    try {
+      await colaboradorService.atualizar(id, { status: novoStatus });
+      setColaboradores((prev) =>
+        prev.map((colab) =>
+          colab.id === id ? { ...colab, status: novoStatus } : colab
+        )
+      );
+      setMenuAberto(null);
+    } catch (error) {
+      console.error("Erro ao alterar status", error);
+    }
   };
 
-  const excluirColaborador = (index) => {
-    const atualizados = colaboradores.filter((_, i) => i !== index);
-    setColaboradores(atualizados);
-    setMenuAberto(null); // fecha o menu após ação
+  const excluirColaborador = async (id) => {
+    try {
+      await colaboradorService.deletar(id);
+      setColaboradores((prev) => prev.filter((colab) => colab.id !== id));
+      setMenuAberto(null);
+    } catch (error) {
+      console.error("Erro ao excluir colaborador", error);
+    }
   };
 
   return (
     <div className="p-6">
-      {/* Modal de adicionar colaborador */}
       <AdicionarColaborador
         aberto={modalAberto}
         aoFechar={() => setModalAberto(false)}
       />
 
-      {/* Título */}
       <h1 className="text-2xl font-bold mb-4">Equipe</h1>
 
-      {/* Linha com botão à esquerda e paginação à direita */}
       <div className="flex justify-between items-center mb-6">
         <Button rounded="rounded-3xl" onClick={() => setModalAberto(true)}>
           Adicionar Colaborador
@@ -65,7 +74,6 @@ export default function EquipePage() {
         </div>
       </div>
 
-      {/* Cabeçalho da tabela */}
       <div className="grid grid-cols-5 gap-4 font-semibold border-b pb-2">
         <div>COLABORADOR</div>
         <div>CARGO</div>
@@ -74,10 +82,9 @@ export default function EquipePage() {
         <div>AÇÕES</div>
       </div>
 
-      {/* Lista de colaboradores */}
       <div className="divide-y mt-2">
         {colaboradores.map((colab, idx) => (
-          <div key={idx} className="grid grid-cols-5 py-3 items-center relative">
+          <div key={colab.id} className="grid grid-cols-5 py-3 items-center relative">
             <div>{colab.nome}</div>
             <div>{colab.cargo}</div>
             <div>{colab.setor}</div>
@@ -94,30 +101,29 @@ export default function EquipePage() {
             </div>
             <div className="relative flex justify-end">
               <button
-                onClick={() => toggleMenu(idx)}
+                onClick={() => toggleMenu(colab.id)}
                 className="p-2 hover:bg-gray-200 rounded-full text-xl font-bold"
               >
                 ...
               </button>
 
-              {/* Menu suspenso */}
-              {menuAberto === idx && (
+              {menuAberto === colab.id && (
                 <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alterarStatus(idx, "Ativo")}
+                    onClick={() => alterarStatus(colab.id, "Ativo")}
                   >
                     Ativar
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alterarStatus(idx, "Desativado")}
+                    onClick={() => alterarStatus(colab.id, "Desativado")}
                   >
                     Desativar
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => excluirColaborador(idx)}
+                    onClick={() => excluirColaborador(colab.id)}
                   >
                     Excluir
                   </button>
