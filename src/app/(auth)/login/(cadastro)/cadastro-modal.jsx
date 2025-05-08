@@ -124,10 +124,6 @@ export default function ModalCadastro({ isOpen, onClose }) {
       }
     }
 
-    if(response.status != 201){
-      window.alert("Erro ao cadastrar usuário!");
-    }
-
     onClose();
   }
 

@@ -17,8 +17,8 @@ export default function EquipePage() {
   useEffect(() => {
     async function fetchColaboradores() {
       try {
-        const data = await colaboradorService.listar();
-        setColaboradores(data);
+        let response = await colaboradorService.listar();
+        setColaboradores(response);
       } catch (error) {
         console.error("Erro ao carregar colaboradores", error);
       }
@@ -85,10 +85,11 @@ export default function EquipePage() {
       <div className="divide-y mt-2">
         {colaboradores.map((colab, idx) => (
           <div key={colab.id} className="grid grid-cols-5 py-3 items-center relative">
-            <div>{colab.nome}</div>
+            <div>{colab.apelido}</div>
             <div>{colab.cargo}</div>
             <div>{colab.setor}</div>
-            <div>
+            <div>{colab.cpf}</div>
+            {/* <div>
               <span
                 className={`px-3 py-1 rounded-full text-sm ${
                   colab.status === "Ativo"
@@ -98,7 +99,7 @@ export default function EquipePage() {
               >
                 {colab.status}
               </span>
-            </div>
+            </div> */}
             <div className="relative flex justify-end">
               <button
                 onClick={() => toggleMenu(colab.id)}
@@ -109,18 +110,6 @@ export default function EquipePage() {
 
               {menuAberto === colab.id && (
                 <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
-                  <button
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alterarStatus(colab.id, "Ativo")}
-                  >
-                    Ativar
-                  </button>
-                  <button
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alterarStatus(colab.id, "Desativado")}
-                  >
-                    Desativar
-                  </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
                     onClick={() => excluirColaborador(colab.id)}

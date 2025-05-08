@@ -5,14 +5,14 @@ import { colaboradorService } from "@/services/colaboradorService";
 
 export default function AdicionarColaborador({ aberto, aoFechar }) {
   const [formData, setFormData] = useState({
-    nome: "",
+    nome_completo: "",
     apelido: "",
     cpf: "",
     cargo: "",
     setor: "",
     vinculo: "",
     matricula: "",
-    dataAdmissao: "",
+    data_admissao: "",
     email: "",
     telefone: "",
     cep: "",
@@ -29,17 +29,25 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
 
   const handleSubmit = async () => {
     try {
-      await colaboradorService.adicionar(formData);
+      let response = await colaboradorService.adicionar(formData);
+      response = await response.json();
+      if(response.data?.error){
+        response.data.error.cpf ? alert("CPF inválido") : null;
+        response.data.error.nome_completo ? alert("Nome inválido") : null;
+        response.data.error.telefone ? alert("Telefone inválido") : null;
+        response.data.error.endereco ? alert("Endereço inválido") : null;
+        return alert("Reveja suas atidudes");
+      }
       aoFechar(); // Fecha o modal
       setFormData({  // Limpa o formulário
-        nome: "",
+        nome_completo: "",
         apelido: "",
         cpf: "",
         cargo: "",
         setor: "",
         vinculo: "",
         matricula: "",
-        dataAdmissao: "",
+        data_admissao: "",
         email: "",
         telefone: "",
         cep: "",
@@ -56,19 +64,19 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
   if (!aberto) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-white p-6 rounded-xl w-full max-w-2xl shadow-lg relative">
+    <div className="fixed inset-0 z-50 bg-white/5 backdrop-blur-xs flex items-center justify-center">
+      <div className="bg-white border border-gray-200 p-6 rounded-xl w-full max-w-2xl shadow-lg relative">
         <h2 className="text-xl font-bold mb-4">Adicionar Colaborador</h2>
 
         <div className="grid grid-cols-2 gap-4">
-          <input name="nome" placeholder="Nome Completo" value={formData.nome} onChange={handleChange} className="border p-2 rounded" />
+          <input name="nome_completo" placeholder="nome_completo Completo" value={formData.nome_completo} onChange={handleChange} className="border p-2 rounded" />
           <input name="apelido" placeholder="Apelido" value={formData.apelido} onChange={handleChange} className="border p-2 rounded" />
           <input name="cpf" placeholder="CPF" value={formData.cpf} onChange={handleChange} className="border p-2 rounded" />
           <input name="cargo" placeholder="Cargo" value={formData.cargo} onChange={handleChange} className="border p-2 rounded" />
           <input name="setor" placeholder="Setor" value={formData.setor} onChange={handleChange} className="border p-2 rounded" />
           <input name="vinculo" placeholder="Vínculo" value={formData.vinculo} onChange={handleChange} className="border p-2 rounded" />
           <input name="matricula" placeholder="Matrícula" value={formData.matricula} onChange={handleChange} className="border p-2 rounded" />
-          <input name="dataAdmissao" type="date" value={formData.dataAdmissao} onChange={handleChange} className="border p-2 rounded" />
+          <input name="data_admissao" type="date" value={formData.data_admissao} onChange={handleChange} className="border p-2 rounded" />
           <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-2 rounded" />
           <input name="telefone" placeholder="Telefone" value={formData.telefone} onChange={handleChange} className="border p-2 rounded" />
           <input name="cep" placeholder="CEP" value={formData.cep} onChange={handleChange} className="border p-2 rounded" />
