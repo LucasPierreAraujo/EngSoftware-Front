@@ -8,16 +8,31 @@ import validators from "@/lib/validators";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { colaboradorService } from "@/services/colaboradorService";
+import { SelectOne } from "@/components/ui/select-one";
 
 export default function Page() {
   const [errors, setErrors] = useState({});
   const [valid, setValid] = useState(true);
+  const [colaboradores, setColaboradores] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
     const hasErrors = Object.values(errors).some((error) => error !== null);
     setValid(!hasErrors);
   }, [errors]);
+
+  useEffect(() => {
+    const fetchColaboradores = async () => {
+      try {
+        const response = await colaboradorService.listar()
+        setColaboradores(response);
+      } catch (error) {
+        console.error("Erro ao buscar colaboradores:", error);
+      }
+    };
+    fetchColaboradores();
+  },[])
 
   const validateField = (name, value) => {
     let error = null;
@@ -77,13 +92,9 @@ export default function Page() {
       }, {});
     try {
       const createClient = await clienteService.store(clientData.nome, clientData);
-      const responseClient = await createClient.json();
-      console.log(responseClient)
-      // Aqui ele não ta pegando o id do cliente...
       const idCliente = createClient.id;
       obraData.cliente_id = idCliente;
       const createObra = await obrasService.store(obraData);
-      console.log(createObra)
       router.push("/obras");
     } catch (error) {
       console.log(error);
@@ -115,12 +126,16 @@ export default function Page() {
             required={true}
             inputStyle="form"
           />
-          <InputField
-            name="responsavel_id"
-            label="Responsável Técnico"
-            type="text"
-            required={true}
-            inputStyle="form"
+          <SelectOne
+          name="responsavel_id"
+          label="Responsável Técnico"
+          options = {colaboradores.map(colaborador => {
+            return {
+              name:colaborador.nome_completo,
+              value:colaborador.id
+            }
+          }
+        )} 
           />
           <InputField
             name="orcamento"
