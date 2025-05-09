@@ -26,6 +26,25 @@ const validators = {
     if (value <= 0) return "Valor não pode ser negativo";
     return null;
   },
+  data(value){
+    const date = new Date(value);
+    if (isNaN(date)) return "Data inválida";
+    return null;
+  },
+  dataPassada(value){
+    const date = new Date(value);
+    if (isNaN(date)) return "Data inválida";
+    const today = new Date();
+    if (date < today) return "Data não pode ser no passado";
+    return null;
+  },
+  dataFutura(value){
+    const date = new Date(value);
+    if (isNaN(date)) return "Data inválida";
+    const today = new Date();
+    if (date > today) return "Data não pode ser no futuro";
+    return null;
+  }
 };
 
 export default validators;

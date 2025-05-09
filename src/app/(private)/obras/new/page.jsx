@@ -15,6 +15,9 @@ export default function Page() {
   const [errors, setErrors] = useState({});
   const [valid, setValid] = useState(true);
   const [colaboradores, setColaboradores] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [novoCliente, setNovoCliente] = useState(false);
+  const [idCliente, setIdCliente] = useState(undefined);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,8 +34,27 @@ export default function Page() {
         console.error("Erro ao buscar colaboradores:", error);
       }
     };
+    const fetchClientes = async () => {
+      try {
+        const response = await clienteService.list()
+        setClientes(response)
+      } catch (error) {
+        console.error("Erro ao buscar clientes:", error);
+      }
+    }
     fetchColaboradores();
-  },[])
+    fetchClientes();
+  }, [])
+  const validateFormObra = (data) => {
+    const errors = [];
+    if (data.data_inicio && data.data_fim_previsto) {
+      if (new Date(data.data_inicio) > new Date(data.data_fim_previsto)) {
+        errors.push("Data de início não pode ser maior que a previsão de término");
+      }
+    }
+    return errors.length > 0 ? errors : null;
+  }
+
 
   const validateField = (name, value) => {
     let error = null;
@@ -41,8 +63,11 @@ export default function Page() {
     const validations = {
       cliente_cpf: ["required", "cpf"],
       cliente_telefone: ["telefone"],
+      cliente_data_nascimento: ["data"],
       nome: ["required"],
       responsavel_id: ["required"],
+      data_inicio: ["data"],
+      data_fim_previsto: ["data", "dataPassada"],
       orcamento: ["required", "dinheiro"],
     };
 
@@ -77,23 +102,36 @@ export default function Page() {
       toast.error("Por favor, corrija os erros no formulário");
       return;
     }
+    if (!idCliente) {
+      const clientData = Object.keys(rawdata)
+        .filter((key) => key.includes("cliente"))
+        .reduce((obj, key) => {
+          obj[key.replace('cliente_', '')] = rawdata[key];
+          return obj;
+        }, {});
+      try {
+        const createClient = await clienteService.store(clientData.nome, clientData);
+        setIdCliente(createClient.id);
+        obraData.cliente_id = idCliente;
+      } catch (error) {
+        console.log(error);
+        toast.error("Erro ao criar cliente: " + error.message);
+        return;
+      }
+    }
 
-    const clientData = Object.keys(rawdata)
-      .filter((key) => key.includes("cliente"))
-      .reduce((obj, key) => {
-        obj[key.replace('cliente_', '')] = rawdata[key];
-        return obj;
-      }, {});
     const obraData = Object.keys(rawdata)
       .filter((key) => !key.includes("cliente"))
       .reduce((obj, key) => {
         obj[key] = rawdata[key];
         return obj;
       }, {});
+    const error = validateFormObra(obraData);
+    if (error) {
+      toast.error("Por favor, corrija os erros no formulário: " + error.join(", "));
+      return;
+    }
     try {
-      const createClient = await clienteService.store(clientData.nome, clientData);
-      const idCliente = createClient.id;
-      obraData.cliente_id = idCliente;
       const createObra = await obrasService.store(obraData);
       router.push("/obras");
     } catch (error) {
@@ -127,15 +165,15 @@ export default function Page() {
             inputStyle="form"
           />
           <SelectOne
-          name="responsavel_id"
-          label="Responsável Técnico"
-          options = {colaboradores.map(colaborador => {
-            return {
-              name:colaborador.nome_completo,
-              value:colaborador.id
+            name="responsavel_id"
+            label="Responsável Técnico"
+            options={colaboradores.map(colaborador => {
+              return {
+                name: colaborador.nome_completo,
+                value: colaborador.id
+              }
             }
-          }
-        )} 
+            )}
           />
           <InputField
             name="orcamento"
@@ -162,62 +200,26 @@ export default function Page() {
               inputStyle="form"
             />
           </div>
-        </div>
-        <div
-          id="cardCliente"
-          className="shadow-lg shadow-gray-400 border border-gray-200 p-4 rounded-xl h-full w-[40%] justify-center items-center"
-        >
-          <h2 className="text-3xl">Dados do Cliente</h2>
-          <InputField
-            name="cliente_nome"
-            label="Nome do Cliente"
-            type="text"
+          <SelectOne
+            label="Cliente"
+            name="cliente_id"
             required={true}
-            inputStyle="form"
+            options={[{ value: "novo", name: "Novo Cliente" }].concat(clientes.map(cliente => {
+              return {
+                name: cliente.nome,
+                value: cliente.id
+              }
+            }))}
+            onChange={(value) => {
+              if (value === "novo") {
+                setNovoCliente(true);
+                setIdCliente(undefined);
+              } else {
+                setNovoCliente(false);
+                setIdCliente(value);
+              }
+            }}
           />
-          <div className="flex gap-4 justify-center items-center">
-            <InputField
-              name="cliente_cpf_cnpj"
-              label="CPF"
-              type="text"
-              required={true}
-              inputStyle="form"
-              error={errors.cliente_cpf}
-              onChange={(value) => handleChange("cliente_cpf", value)}
-            />
-            <InputField
-              name="cliente_telefone"
-              label="Telefone"
-              type="test"
-              required={false}
-              inputStyle="form"
-              error={errors.cliente_telefone}
-              onChange={(value) => handleChange("cliente_telefone", value)}
-            />
-          </div>
-          <InputField
-            name="cliente_endereco"
-            label="Endereço"
-            type="text"
-            required={false}
-            inputStyle="form"
-          />
-          <div className="flex gap-4 justify-center items-center">
-            <InputField
-              name="cliente_municipio"
-              label="Município"
-              type="text"
-              required={false}
-              inputStyle="form"
-            />
-            <InputField
-              name="cliente_data_nascimento"
-              label="Data de Nascimento"
-              type="date"
-              required={false}
-              inputStyle="form"
-            />
-          </div>
           <div className="flex justify-around items-center">
             <Button
               rounded="w-[150px] h-[40px]"
@@ -240,6 +242,66 @@ export default function Page() {
             <Button rounded="w-[150px] h-[40px]" disabled={!valid}>Concluir</Button>
           </div>
         </div>
+        {novoCliente && (
+
+          <div
+            id="cardCliente"
+            className="shadow-lg shadow-gray-400 border border-gray-200 p-4 rounded-xl h-full w-[40%] justify-center items-center"
+          >
+            <h2 className="text-3xl">Dados do Cliente</h2>
+            <InputField
+              name="cliente_nome"
+              label="Nome do Cliente"
+              type="text"
+              required={true}
+              inputStyle="form"
+            />
+            <div className="flex gap-4 justify-center items-center">
+              <InputField
+                name="cliente_cpf_cnpj"
+                label="CPF"
+                type="text"
+                required={true}
+                inputStyle="form"
+                error={errors.cliente_cpf}
+                onChange={(value) => handleChange("cliente_cpf", value)}
+              />
+              <InputField
+                name="cliente_telefone"
+                label="Telefone"
+                type="test"
+                required={false}
+                inputStyle="form"
+                error={errors.cliente_telefone}
+                onChange={(value) => handleChange("cliente_telefone", value)}
+              />
+            </div>
+            <InputField
+              name="cliente_endereco"
+              label="Endereço"
+              type="text"
+              required={false}
+              inputStyle="form"
+            />
+            <div className="flex gap-4 justify-center items-center">
+              <InputField
+                name="cliente_municipio"
+                label="Município"
+                type="text"
+                required={false}
+                inputStyle="form"
+              />
+              <InputField
+                name="cliente_data_nascimento"
+                label="Data de Nascimento"
+                type="date"
+                required={false}
+                inputStyle="form"
+              />
+            </div>
+          </div>
+        )}
+
       </div>
     </form>
   );
