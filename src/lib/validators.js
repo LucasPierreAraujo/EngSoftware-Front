@@ -5,6 +5,7 @@ const validators = {
     return null;
   },
   telefone(value) {
+    if (value == "") return null;
     const clean = value.replace(/\D/g, "");
     if (clean.length > 11 || clean.length < 10)
       return "Informe o telefone com DDD no formado (XX)XXXXX-XXXX";
@@ -31,14 +32,14 @@ const validators = {
     if (isNaN(date)) return "Data inválida";
     return null;
   },
-  dataPassada(value){
+  dataFutura(value){
     const date = new Date(value);
     if (isNaN(date)) return "Data inválida";
     const today = new Date();
     if (date < today) return "Data não pode ser no passado";
     return null;
   },
-  dataFutura(value){
+  dataPassada(value){
     const date = new Date(value);
     if (isNaN(date)) return "Data inválida";
     const today = new Date();
