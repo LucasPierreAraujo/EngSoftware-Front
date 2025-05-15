@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
+import {toast} from "sonner";
 
 export default function AdicionarColaborador({ aberto, aoFechar }) {
   const [formData, setFormData] = useState({
@@ -58,6 +59,12 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
       });
     } catch (error) {
       console.error("Erro ao cadastrar colaborador:", error);
+      toast.error(error.message, {
+          description: "Erro ao cadsatrar colaborador",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
     }
   };
 
@@ -69,7 +76,7 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
         <h2 className="text-xl font-bold mb-4">Adicionar Colaborador</h2>
 
         <div className="grid grid-cols-2 gap-4">
-          <input name="nome_completo" placeholder="nome_completo Completo" value={formData.nome_completo} onChange={handleChange} className="border p-2 rounded" />
+          <input name="nome_completo" placeholder="Nome Completo" value={formData.nome_completo} onChange={handleChange} className="border p-2 rounded" />
           <input name="apelido" placeholder="Apelido" value={formData.apelido} onChange={handleChange} className="border p-2 rounded" />
           <input name="cpf" placeholder="CPF" value={formData.cpf} onChange={handleChange} className="border p-2 rounded" />
           <input name="cargo" placeholder="Cargo" value={formData.cargo} onChange={handleChange} className="border p-2 rounded" />

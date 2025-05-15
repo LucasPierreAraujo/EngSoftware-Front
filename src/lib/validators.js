@@ -24,7 +24,7 @@ const validators = {
   },
   dinheiro(value) {
     if (isNaN(value)) return "Valor deve ser numérico";
-    if (value <= 0) return "Valor não pode ser negativo";
+    if (value <= 0) return "Valor deve ser maior que zero";
     return null;
   },
   data(value){
