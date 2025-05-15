@@ -7,12 +7,12 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-[#2A2567]">constrTech</span>
+            <span className="text-2xl font-bold text-[#2A2567]">ConstruTech</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
           <Link href="#inicio" className="text-[#534F86] hover:text-[#2A2567]">
-              Inicio
+              Início
             </Link>
             <Link href="#features" className="text-[#534F86] hover:text-[#2A2567]">
               Recursos

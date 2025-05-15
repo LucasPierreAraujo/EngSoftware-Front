@@ -10,7 +10,7 @@ export function CTA() {
             Comece a transformar a gestão das suas obras hoje
           </h2>
           <p className="text-lg text-white/80 mb-8">
-            Experimente gratuitamente por 14 dias e descubra como o constrTech pode
+            Experimente gratuitamente por 14 dias e descubra como o ConstruTech pode
             revolucionar a forma como você gerencia suas obras.
           </p>
           <div className="flex gap-6 justify-center">

@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
-            <h3 className="text-2xl font-bold mb-4">constrTech</h3>
+            <h3 className="text-2xl font-bold mb-4">ConstruTech</h3>
             <p className="text-white/80">
               Transformando a gestão de obras com tecnologia e inovação.
             </p>
@@ -70,11 +70,11 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-center gap-2">
                 <Building2 className="w-5 h-5" />
-                <span className="text-white/80">constrTech Ltda.</span>
+                <span className="text-white/80">ConstruTech Ltda.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-5 h-5" />
-                <span className="text-white/80">contato@constrtech.com</span>
+                <span className="text-white/80">contato@ConstruTech.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-5 h-5" />
@@ -89,7 +89,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-8 text-center text-white/60">
-          <p>&copy; {new Date().getFullYear()} constrTech. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} ConstruTech. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

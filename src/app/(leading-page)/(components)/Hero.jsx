@@ -19,7 +19,7 @@ export function Hero() {
             Versão Beta
           </div>
           <h1 className="text-6xl md:text-7xl font-bold mb-8 leading-tight">
-            <span className="text-[#2A2567]">constrTech</span>
+            <span className="text-[#2A2567]">ConstruTech</span>
             <br />
             <span className="text-[#534F86]">Gestão de Obras</span>
           </h1>

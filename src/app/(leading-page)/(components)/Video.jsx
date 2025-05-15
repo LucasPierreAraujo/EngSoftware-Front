@@ -38,7 +38,7 @@ export function Video() {
   return (
     <div id="video" className="container mx-auto px-4 py-24">
       <div className="text-center mb-16">
-        <h2 className="text-4xl font-bold mb-4">Veja o constrTech em ação</h2>
+        <h2 className="text-4xl font-bold mb-4">Veja o ConstruTech em ação</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Descubra como nossa plataforma pode transformar a gestão das suas
           obras
