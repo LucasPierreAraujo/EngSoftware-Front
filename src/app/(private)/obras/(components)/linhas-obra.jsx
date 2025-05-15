@@ -1,4 +1,5 @@
 import { ProgressBar } from '@/components/ui/progress-bar';
+import Link from 'next/link';
 
 export function LinhaObraAndamento({
   nome,
@@ -7,7 +8,7 @@ export function LinhaObraAndamento({
   andamento,
 }) {
   return (
-    <div className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela px-4 text-[14px]">
+    <Link href={`/obras/10`} className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full">{nome}</div>
       <div className="w-full">{responsavel.nome_completo}</div>
       <div className="w-full">{data_inicio ? new Date(data_inicio).toLocaleDateString(): ''}</div>
@@ -15,7 +16,7 @@ export function LinhaObraAndamento({
         <ProgressBar progress={andamento} transparent={true} />
       </div>
       <div className="w-full">...</div>
-    </div>
+    </Link>
   );
 }
 
@@ -26,7 +27,7 @@ export function LinhaObraConcluida({
   data_fim,
 }) {
   return (
-    <div className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela px-4 text-[14px]">
+    <Link href={`/obras/10`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full py-2">{nome}</div>
       <div className="w-full py-2">{responsavel.nome_completo}</div>
       <div className="w-full py-2">
@@ -36,7 +37,7 @@ export function LinhaObraConcluida({
         {data_fim ? new Date(data_fim).toLocaleDateString() : ""}
       </div>
       <div className="w-full py-2">...</div>
-    </div>
+    </Link>
   );
 }
 
@@ -47,7 +48,7 @@ export function LinhaObraArquivada({
   data_arquivamento,
 }) {
   return (
-    <div className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela px-4 text-[14px]">
+    <Link href={`/obras/10`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full py-2">{nome}</div>
       <div className="w-full py-2">{responsavel.nome_completo}</div>
       <div className="w-full py-2">
@@ -57,6 +58,6 @@ export function LinhaObraArquivada({
         {data_arquivamento ? new Date(data_arquivamento).toLocaleDateString() : ""}
       </div>
       <div className="w-full py-2">...</div>
-    </div>
+    </Link>
   );
 }

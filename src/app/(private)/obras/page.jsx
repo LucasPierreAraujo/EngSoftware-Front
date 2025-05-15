@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { obrasService } from "@/services/obrasService";
 import { toast } from "sonner";
+import HeaderObras from "./(components)/header-obras";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -53,6 +54,8 @@ export default function Page() {
 
   return (
     <div className="m-auto">
+      <HeaderObras />
+
       {(currentStatus === "todas" || currentStatus == "Em Andamento") && (
         <TabelaObrasAndamento obras={obras} />
       )}
