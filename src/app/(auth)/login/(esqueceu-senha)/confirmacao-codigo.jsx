@@ -11,7 +11,7 @@ export default function ModalConfirmeCodigo({ isOpen, onCodeVerified }) {
   if (typeof window === "undefined") return;
 
   const [codigo, setCodigo] = useState("");
-  const codigoCorreto = "1234";
+  const codigoCorreto = sessionStorage.getItem('token_reset');
 
   const { errorMessage, updateErrorMessage, disableErrorMessage } =
     useErrorsHooks();

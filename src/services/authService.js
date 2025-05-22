@@ -72,6 +72,19 @@ export const authService = {
   async register(data) {
     const response = await api.post("users", data);
     return response;
+  },
+  async forgotPassword(email) {
+    const response = await api.post("auth/password/send-link", { email: email });
+    return response;
+  },
+  async resetPassword(email, password, repeat, token)
+  {
+    const response = await api.post("auth/password/reset", {
+      email: email,
+      token: token,
+      password: password,
+      password_confirmation: repeat
+    });
+    return response;
   }
-  
 };

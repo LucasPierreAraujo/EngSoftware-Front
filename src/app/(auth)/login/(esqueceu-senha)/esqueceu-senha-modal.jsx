@@ -4,8 +4,10 @@ import Modal from "@/components/layout/modal";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
 import { useState } from "react";
+import { toast } from "sonner";
 import ModalConfirmeCodigo from "./confirmacao-codigo";
 import ModalNovaSenha from "./nova-senha";
+import { authService } from '@/services/authService';
 
 export default function ModalEsqueceuSenha({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -24,7 +26,7 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
     return regex.test(email);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!email) {
       setError("O e-mail é obrigatório.");
       return;
@@ -37,10 +39,24 @@ export default function ModalEsqueceuSenha({ isOpen, onClose }) {
       });
       return;
     }
+    try {
+      const request = await authService.forgotPassword(email);
+      setError(null);
+      window.alert(`Email enviado para: ${email}`);
+      console.log(request.token);
+      sessionStorage.setItem('token_reset', request.token)
+      sessionStorage.setItem('email_reset', email)
+      setShowVerifyCode(true);
+    } catch(error) {
+      setError(error.message)
+      toast.error(error.message, {
+        description: "Erro ao solicitar reset de senha",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
+    }
 
-    setError(null);
-    window.alert(`Email enviado para: ${email}`);
-    setShowVerifyCode(true);
   }
 
   function handleCodeVerified() {
