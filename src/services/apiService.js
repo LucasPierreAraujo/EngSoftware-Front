@@ -13,7 +13,7 @@ async function handleResponse(response) {
         throw new ApiError(
           error.message || "Erro na requisição",
           response.status,
-          error.details
+          error.errors || {}
         );
       }
       return response.json();

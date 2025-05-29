@@ -70,8 +70,13 @@ export const authService = {
   },
 
   async register(data) {
-    const response = await api.post("users", data);
-    return response;
+    try{
+      const response = await api.post("users", data);
+      return response;
+    } catch(error){
+      errorHandler.handle(error);
+      throw error;
+    }
   },
   async forgotPassword(email) {
     const response = await api.post("auth/password/send-link", { email: email });

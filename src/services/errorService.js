@@ -23,6 +23,15 @@ export const errorHandler = {
           // Recurso não encontrado
           console.error("Recurso não encontrado");
           break;
+        case 422:
+          // Erro de validação
+          console.error("Erro de validação:", error.details);
+          if (error.details) {
+            for (const [key, value] of Object.entries(error.details)) {
+              console.error(`${key}: ${value.join(", ")}`);
+            }
+          }
+          break;
         default:
           console.error("Erro na requisição:", error.message);
       }

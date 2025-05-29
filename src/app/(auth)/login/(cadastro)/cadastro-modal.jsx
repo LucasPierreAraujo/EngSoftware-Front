@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useErrorsHooks } from "@/hooks/error-message-hook";
 import { SelectOne } from "@/components/ui/select-one";
 import { authService } from "@/services/authService";
+import { toast } from "sonner";
 
 export default function ModalCadastro({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -74,10 +75,10 @@ export default function ModalCadastro({ isOpen, onClose }) {
       return false;
     }
 
-    if (senha.length < 6) {
+    if (senha.length < 8) {
       updateErrorMessage({
         title: "senha",
-        message: "A senha deve ter no mínimo 6 caracteres.",
+        message: "A senha deve ter no mínimo 8 caracteres.",
       });
       return false;
     }
@@ -103,27 +104,39 @@ export default function ModalCadastro({ isOpen, onClose }) {
       password: senha,
       type: cargo,
     };
-    const response = await authService.register(data);
-
-    if(response.status == 422){
-      const data = await response.json();
-      if(data.errors?.email){
-        
-        return updateErrorMessage({
-          title: "email",
-          message: "Este email já está cadastrado"
-        });
+    try{
+      const response = await authService.register(data);
+    }catch(error){
+      const details = error.details || {};
+      let errorMessage = ""
+      for (const [key, value] of Object.entries(details)) {
+        errorMessage += `${key}: ${value.join(", ")}\n`;
       }
-
-      if(data.errors?.phone){
-        
-        return updateErrorMessage({
-          title: "telefone", 
-          message: "Este telefone já está cadastrado"
-        });
-      }
+      toast.error(`Erro ao cadastrar usuário. Verifique os campos: ${errorMessage}`);
+      console.error("Erro ao formatar os dados:", error);
+      return updateErrorMessage({
+        title: "formato",
+        message: "Erro ao formatar os dados. Verifique os campos."
+      });
+      // if(response.status == 422){
+      //   const data = await response.json();
+      //   if(data.errors?.email){
+          
+      //     return updateErrorMessage({
+      //       title: "email",
+      //       message: "Este email já está cadastrado"
+      //     });
+      //   }
+  
+      //   if(data.errors?.phone){
+          
+      //     return updateErrorMessage({
+      //       title: "telefone", 
+      //       message: "Este telefone já está cadastrado"
+      //     });
+      //   }
+      // }
     }
-
     onClose();
   }
 
