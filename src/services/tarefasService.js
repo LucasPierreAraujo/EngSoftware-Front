@@ -65,5 +65,23 @@ export const tarefasService = {
       errorHandler.handle(error);
       throw error;
     }
+  },
+  async iniciar(id){
+    try{
+      const response = await api.patch(`${this.base_url}/${id}/iniciar`);
+      return response || {};
+    } catch (error) {
+      errorHandler.handle(error);
+      throw error;
+    }
+  },
+  async concluir(id){
+    try{
+      const response = await api.patch(`${this.base_url}/${id}/concluir`);
+      return response || {};
+    } catch (error) {
+      errorHandler.handle(error);
+      throw error;
+    }
   }
-}; 
+};
