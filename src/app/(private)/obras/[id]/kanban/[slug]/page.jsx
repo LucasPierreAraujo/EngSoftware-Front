@@ -14,15 +14,12 @@ export default function page() {
   const route = useRouter()
   const [data, setData] = useState(null)
 
-  console.log({
-    id,
-    slug,
-  });
+
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await obrasService.view(id);
-      console.log(response)
+      console.log({obraService: response})
       setData(response)
     };
     fetchData();
