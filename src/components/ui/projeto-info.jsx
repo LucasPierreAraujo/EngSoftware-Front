@@ -1,11 +1,16 @@
 "use client"
 
-export default function ProjetoInfo(){
+export default function ProjetoInfo({
+  responsavel, estimativa, orcamento, dt_inicio
+}){
+
+    const data = ``
+
     const info = [
-        { label: 'RESPONSÁVEL', value: 'Jose da Silva' },
-        { label: 'ESTIMATIVA', value: '365 Dias' },
-        { label: 'ORÇAMENTO TOTAL', value: 'R$ 1.566.763,20' },
-        { label: 'DATA DE INÍCIO', value: '27/03/2025' },
+        { label: 'RESPONSÁVEL', value: responsavel },
+        { label: 'ESTIMATIVA', value: estimativa },
+        { label: 'ORÇAMENTO TOTAL', value: orcamento },
+        { label: 'DATA DE INÍCIO', value: dt_inicio },
       ];
     return(
         <div className="flex  flex-wrap p-4 rounded-xl justify-center">

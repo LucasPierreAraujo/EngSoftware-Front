@@ -15,7 +15,7 @@ export function SelectOne({
   };
 
   return (
-    <div className="w-full ">
+    <div className="w-full text-black">
       {label && <label className="text-sm font-medium">{label}</label>}
       <select
         className={style[inputStyle]}

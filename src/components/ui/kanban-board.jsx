@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -6,6 +6,7 @@ import {
   useSensors,
   PointerSensor,
   useDroppable,
+  DragOverlay,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -15,60 +16,158 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import NovoCartao from "@/app/(private)/kanban/modal/novo-cartao";
+import NovoCartao from "@/app/(private)/obras/[id]/kanban/[slug]/modal/novo-cartao";
+import { tarefasService } from "@/services/tarefasService";
 
-export default function KanbanBoard() {
+export default function KanbanBoard({ etapa_id }) {
   const [showModal, setShowModal] = useState(false);
   const [targetColumn, setTargetColumn] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [tarefas, setTarefas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dataEditModalId, setDataEditModalId] = useState(null);
 
-  const [selectedColor, setSelectedColor] = useState("#ff0000");
-
-  const initialColumns = {
-    "em-aberto": { title: "Em Aberto", items: ["1", "2"] },
-    "em-andamento": { title: "Em Andamento", items: ["3"] },
-    concluido: { title: "Concluído", items: ["4"] },
+  // Mapeamento dos IDs de status para nomes de colunas e títulos
+  const statusMapping = {
+    1: "Pendente",
+    2: "Em Andamento",
+    3: "Concluída",
+    4: "Arquivada",
   };
 
-  const itemsData = {
-    1: {
-      id: "1",
-      title: "Aterro",
-      equipe: "05",
-      dias: "27/03 - 29/04",
-      valor: "R$ 6.000,00",
-    },
-    2: {
-      id: "2",
-      title: "Escreva o serviço",
-      equipe: "Equipe A",
-      dias: "27/01 - 29/01",
-      valor: "R$ 6.000,00",
-    },
-    3: {
-      id: "3",
-      title: "Serviço em andamento",
-      equipe: "Equipe B",
-      dias: "27/01 - 29/01",
-      valor: "R$ 6.000,00",
-    },
-    4: {
-      id: "4",
-      title: "Finalizado",
-      equipe: "Equipe C",
-      dias: "27/01 - 29/01",
-      valor: "R$ 6.000,00",
-    },
+  const initialColumns = {
+    1: { title: statusMapping[1], items: [] },
+    2: { title: statusMapping[2], items: [] },
+    3: { title: statusMapping[3], items: [] },
+    4: { title: statusMapping[4], items: [] },
+  };
+
+  useEffect(() => {
+    carregarTarefas();
+  }, [etapa_id]);
+
+  const carregarTarefas = async () => {
+    try {
+      setLoading(true);
+      const response = await tarefasService.list(etapa_id);
+      console.log("Tarefas carregadas:", response);
+      setTarefas(response);
+
+      // Organizar tarefas por status_id numérico
+      const novasColunas = { ...initialColumns };
+
+      response.forEach((tarefa) => {
+        const statusId = tarefa.status_id;
+        // Verifica se o statusId existe no mapeamento, caso contrário, define como 1 (Pendente)
+        if (statusMapping[statusId]) {
+          novasColunas[statusId].items.push(tarefa.id.toString());
+        } else {
+          novasColunas[1].items.push(tarefa.id.toString()); // Default para Pendente
+        }
+      });
+
+      console.log("Colunas organizadas:", novasColunas);
+      setColumnsState(novasColunas);
+    } catch (error) {
+      console.error("Erro ao carregar tarefas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [columnsState, setColumnsState] = useState(initialColumns);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const onDragStart = ({ active }) => {
+    setActiveId(active.id);
+  };
+
+  const onDragEnd = async ({ active, over }) => {
+    setActiveId(null);
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    const fromColumnId = Object.keys(columnsState).find((col) =>
+      columnsState[col].items.includes(activeId)
+    );
+    // overId pode ser o id de um item ou o id de uma coluna
+    const toColumnId =
+      Object.keys(columnsState).find((col) =>
+        columnsState[col].items.includes(overId)
+      ) || overId;
+
+    if (!fromColumnId || !toColumnId) return;
+    if (fromColumnId === toColumnId) return;
+
+    // Converte o ID da coluna de destino para número para enviar ao backend
+    const targetStatusId = parseInt(toColumnId, 10);
+
+    // if (isNaN(targetStatusId)) {
+    //     console.error("ID de status inválido:", toColumnId);
+    //     // Em caso de ID inválido, podemos simplesmente retornar ou mostrar um erro, não recarregar tudo
+    //     return;
+    // }
+
+    // Salva o estado atual das colunas antes da atualização local
+    const previousColumnsState = { ...columnsState };
+
+    // Atualização otimista do estado local
+    const fromItems = [...columnsState[fromColumnId].items];
+    const toItems = [...columnsState[toColumnId].items];
+
+    fromItems.splice(fromItems.indexOf(activeId), 1);
+    const overIndex = toItems.indexOf(overId);
+
+    if (overIndex >= 0) {
+      toItems.splice(overIndex, 0, activeId);
+    } else {
+      toItems.push(activeId);
+    }
+
+    setColumnsState((prev) => ({
+      ...prev,
+      [fromColumnId]: { ...prev[fromColumnId], items: fromItems },
+      [toColumnId]: { ...prev[toColumnId], items: toItems },
+    }));
+
+    let response = await tarefasService.updateStatus(activeId, targetStatusId);
+    console.log(response);
+
+    // Se chegou aqui, a atualização no backend foi bem-sucedida. Não precisa fazer mais nada.
   };
 
   function SortableItem({ id }) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-      useSortable({ id });
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id });
+
+    const tarefa = tarefas.find((t) => t.id.toString() === id);
+    console.log("Renderizando tarefa:", tarefa, "para id:", id);
+
+    if (!tarefa) {
+      console.log("Tarefa não encontrada para id:", id);
+      return null;
+    }
+
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
+      opacity: isDragging ? 0.3 : 1,
+      borderLeft: `5px solid ${tarefa.cor}`,
     };
-
-    const item = itemsData[id];
 
     return (
       <div
@@ -76,13 +175,18 @@ export default function KanbanBoard() {
         style={style}
         {...attributes}
         {...listeners}
-        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all cursor-grab"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="font-semibold text-lg truncate">{item.title}</p>
+          <p className="font-semibold text-lg truncate">{tarefa.titulo}</p>
           <div className="flex items-center gap-2">
-            <div className="h-5 w-10 rounded-3xl bg-[#16F22C]"></div>
-            <button>
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                setShowModal(true);
+                setDataEditModalId(tarefa);
+              }}
+            >
               <Image
                 alt="edit"
                 src={"/icons/edit.png"}
@@ -93,7 +197,34 @@ export default function KanbanBoard() {
           </div>
         </div>
         <div className="text-sm">
-          👷 {item.equipe} &nbsp; 📅 {item.dias} <br /> 💰 {item.valor}
+          <p className="py-1">
+            {tarefa.descricao}
+          </p>
+          <div className="flex gap-2 items-center">
+            <span>
+              {new Date(tarefa.created_at).getDate() < 10
+                ? "0" + new Date(tarefa.created_at).getDate()
+                : new Date(tarefa.created_at).getDate()}
+              /
+              {new Date(tarefa.created_at).getMonth() < 10
+                ? "0" + new Date(tarefa.created_at).getMonth()
+                : new Date(tarefa.created_at).getMonth()}
+              /{new Date(tarefa.created_at).getFullYear()}
+            </span>
+
+            {tarefa.data_fim != null && (
+              <span>
+                {new Date(tarefa.created_at).getDate() < 10
+                  ? "0" + new Date(tarefa.created_at).getDate()
+                  : new Date(tarefa.created_at).getDate()}
+                /
+                {new Date(tarefa.created_at).getMonth() < 10
+                  ? "0" + new Date(tarefa.created_at).getMonth()
+                  : new Date(tarefa.created_at).getMonth()}
+                /{new Date(tarefa.created_at).getFullYear()}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -101,6 +232,9 @@ export default function KanbanBoard() {
 
   function DroppableColumn({ id, children }) {
     const { setNodeRef } = useDroppable({ id });
+    // Use o statusMapping para obter o título da coluna
+    const columnTitle = statusMapping[id] || "Status Desconhecido";
+
     return (
       <div ref={setNodeRef} className="flex flex-col gap-4 min-h-[100px]">
         {children}
@@ -108,61 +242,19 @@ export default function KanbanBoard() {
     );
   }
 
-  const [columnsState, setColumnsState] = useState(initialColumns);
-  const sensors = useSensors(useSensor(PointerSensor));
-
-  const onDragEnd = ({ active, over }) => {
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    const fromColumnId = Object.keys(columnsState).find((col) =>
-      columnsState[col].items.includes(activeId)
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Image src="/gif/loading.png" alt="Loading" width={100} height={100} />
+      </div>
     );
-    const toColumnId =
-      Object.keys(columnsState).find((col) =>
-        columnsState[col].items.includes(overId)
-      ) || overId;
-
-    if (!fromColumnId || !toColumnId) return;
-
-    if (fromColumnId === toColumnId) {
-      const items = columnsState[fromColumnId].items;
-      const newItems = arrayMove(
-        items,
-        items.indexOf(activeId),
-        items.indexOf(overId)
-      );
-
-      setColumnsState((prev) => ({
-        ...prev,
-        [fromColumnId]: { ...prev[fromColumnId], items: newItems },
-      }));
-    } else {
-      const fromItems = [...columnsState[fromColumnId].items];
-      const toItems = [...columnsState[toColumnId].items];
-
-      fromItems.splice(fromItems.indexOf(activeId), 1);
-      const overIndex = toItems.indexOf(overId);
-      if (overIndex >= 0) {
-        toItems.splice(overIndex, 0, activeId);
-      } else {
-        toItems.push(activeId);
-      }
-
-      setColumnsState((prev) => ({
-        ...prev,
-        [fromColumnId]: { ...prev[fromColumnId], items: fromItems },
-        [toColumnId]: { ...prev[toColumnId], items: toItems },
-      }));
-    }
-  };
+  }
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={onDragStart}
       onDragEnd={onDragEnd}
     >
       <div className="flex gap-6 p-6 overflow-x-auto w-full items-start">
@@ -195,13 +287,25 @@ export default function KanbanBoard() {
             </button>
             {showModal && (
               <NovoCartao
-                columnId={targetColumn}
+                columnId={targetColumn} // Passa o ID numérico da coluna
+                data={dataEditModalId}
                 onClose={() => setShowModal(false)}
+                onSuccess={() => {
+                  setShowModal(false);
+                  carregarTarefas();
+                }}
               />
             )}
           </div>
         ))}
       </div>
+      <DragOverlay>
+        {activeId ? (
+          <div className="bg-white p-4 rounded-lg shadow-lg opacity-80">
+            {tarefas.find((t) => t.id.toString() === activeId)?.titulo}
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

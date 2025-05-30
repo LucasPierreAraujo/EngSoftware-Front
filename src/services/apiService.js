@@ -54,6 +54,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
+    console.log(response)
     return handleResponse(response);
   },
   

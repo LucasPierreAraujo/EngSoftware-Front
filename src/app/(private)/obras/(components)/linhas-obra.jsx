@@ -6,9 +6,10 @@ export function LinhaObraAndamento({
   responsavel,
   data_inicio,
   andamento,
+  id,
 }) {
   return (
-    <Link href={`/obras/10`} className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
+    <Link href={`/obras/${id}`} className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full">{nome}</div>
       <div className="w-full">{responsavel.nome_completo}</div>
       <div className="w-full">{data_inicio ? new Date(data_inicio).toLocaleDateString(): ''}</div>
@@ -27,7 +28,7 @@ export function LinhaObraConcluida({
   data_fim,
 }) {
   return (
-    <Link href={`/obras/10`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
+    <Link href={`/obras/${id}`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full py-2">{nome}</div>
       <div className="w-full py-2">{responsavel.nome_completo}</div>
       <div className="w-full py-2">
@@ -48,7 +49,7 @@ export function LinhaObraArquivada({
   data_arquivamento,
 }) {
   return (
-    <Link href={`/obras/10`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
+    <Link href={`/obras/${id}`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
       <div className="w-full py-2">{nome}</div>
       <div className="w-full py-2">{responsavel.nome_completo}</div>
       <div className="w-full py-2">

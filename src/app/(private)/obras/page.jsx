@@ -28,6 +28,7 @@ export default function Page() {
       try {
         setLoading(true);
         const response = await obrasService.list(currentStatus, currentPage);
+        console.log(response);
         setObras(response.data);
         setPaginationInfo({
           total: response.total,
@@ -53,7 +54,7 @@ export default function Page() {
   }
 
   return (
-    <div className="m-auto">
+    <div className="m-auto p-6">
       <HeaderObras />
 
       {(currentStatus === "todas" || currentStatus == "Em Andamento") && (

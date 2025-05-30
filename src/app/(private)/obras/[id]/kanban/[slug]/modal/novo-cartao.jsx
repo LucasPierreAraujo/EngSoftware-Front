@@ -6,7 +6,7 @@ import { SelectOne } from "@/components/ui/select-one";
 import { TextArea } from "@/components/ui/text-area";
 import { useState } from "react";
 
-export default function NovoCartao({ columnId, onClose }) {
+export default function NovoCartao({ columnId, onClose, data = null}) {
   const [titulo, setTitulo] = useState("");
   const [equipe, setEquipe] = useState("");
   const [previsto, setPrevisto] = useState("");
@@ -15,6 +15,10 @@ export default function NovoCartao({ columnId, onClose }) {
   const [inicio, setInicio] = useState("");
   const [termino, setTermino] = useState("");
   const [descricao, setDescricao] = useState("");
+
+
+  console.log({data: data})
+
   return (
     <Modal onClose={onClose}>
       <section>
