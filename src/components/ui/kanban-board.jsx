@@ -39,7 +39,6 @@ export default function KanbanBoard({ etapa_id }) {
     1: { title: statusMapping[1], items: [] },
     2: { title: statusMapping[2], items: [] },
     3: { title: statusMapping[3], items: [] },
-    4: { title: statusMapping[4], items: [] },
   };
 
   useEffect(() => {
@@ -141,6 +140,14 @@ export default function KanbanBoard({ etapa_id }) {
     let response = await tarefasService.updateStatus(activeId, targetStatusId);
     console.log(response);
 
+    if (targetStatusId == 2) {
+      console.log("Andamento");
+    }
+
+    if (targetStatusId == 3) {
+      console.log("Concluida");
+    }
+
     // Se chegou aqui, a atualização no backend foi bem-sucedida. Não precisa fazer mais nada.
   };
 
@@ -197,9 +204,7 @@ export default function KanbanBoard({ etapa_id }) {
           </div>
         </div>
         <div className="text-sm">
-          <p className="py-1">
-            {tarefa.descricao}
-          </p>
+          <p className="py-1">{tarefa.descricao}</p>
           <div className="flex gap-2 items-center">
             <span>
               {new Date(tarefa.created_at).getDate() < 10
