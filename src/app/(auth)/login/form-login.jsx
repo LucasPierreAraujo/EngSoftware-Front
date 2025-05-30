@@ -73,9 +73,13 @@ export default function LoginForm() {
       await authService.login(email, password);
       router.push('/dashboard'); // ou para onde desejar redirecionar após login
     } catch (error) {
-     
       console.error("Erro ao logar: " + error.message);
-
+      toast.error("Email ou senha incorretos. Por favor tente novamente.", {
+        description: "Erro ao logar",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
       setErrorSubmit({
         title: "email",
         message:

@@ -1,11 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 import { InputField } from "@/components/ui/input-field";
 import { useState } from "react";
 import { useErrorsHooks } from "@/hooks/error-message-hook";
+import { authService } from "@/services/authService";
+import { toast } from "sonner";
 
 export default function ModalNovaSenha({ isOpen, onClose }) {
+  const router = useRouter();
   if (!isOpen) return null;
   if (typeof window === "undefined") return;
 
@@ -35,13 +39,29 @@ export default function ModalNovaSenha({ isOpen, onClose }) {
     return true;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     disableErrorMessage();
 
     if (!validatePasswords(novaSenha, confirmeNovaSenha)) return;
 
-    window.alert("Nova senha registrada com sucesso!");
-    onClose();
+    try {
+      const response = await authService.resetPassword(
+        sessionStorage.getItem("email_reset"),
+        novaSenha,
+        confirmeNovaSenha,
+        sessionStorage.getItem("token_reset")
+      );
+      toast.info("Senha resetada com sucesso.")
+      onClose()
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.message, {
+        description: "Erro ao resetar de senha",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
+    }
   }
 
   return (
