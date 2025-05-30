@@ -9,6 +9,7 @@ import { obrasService } from "@/services/obrasService";
 import { reportService } from "@/services/reportService";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function RelatorioObraModal({ onClose, draft, report = null }) {
   console.log(report);
@@ -137,26 +138,29 @@ export default function RelatorioObraModal({ onClose, draft, report = null }) {
   };
 
   async function handleEnviar(){
+    try
+    {
 
-    const store = await reportService.store({
-      data_do_registro: data,
-      id_obra: obra,
-      id_responsavel: responsavel,
-      descricao: observacao,
-      tempo_climatico: tempo,
-      tempo_climatico_t_max: tmax,
-      tempo_climatico_t_min: tmin,
-      tempo_climatico_observacao: observacaoTempo,
-      servico_executado: servico,
-      etapa_frente: etapa,
-      atrasos: atrasos,
-      visitas_tecnicas: visitas,
-      acidente: acidente,
-      problemas_operacionais: problemas
-    })
-
-    if(!store){
-      console.error("Deu ruim major! volta para casa!")
+      const store = await reportService.store({
+        data_do_registro: data,
+        id_obra: obra,
+        id_responsavel: responsavel,
+        descricao: observacao,
+        tempo_climatico: tempo,
+        tempo_climatico_t_max: tmax,
+        tempo_climatico_t_min: tmin,
+        tempo_climatico_observacao: observacaoTempo,
+        servico_executado: servico,
+        etapa_frente: etapa,
+        atrasos: atrasos,
+        visitas_tecnicas: visitas,
+        acidente: acidente,
+        problemas_operacionais: problemas
+      })
+  
+      toast.success("Relatório enviado com sucesso!");
+    }catch(error){
+      toast.error("Erro ao enviar relatório. Verifique o preenchimento dos campos.");
     }
 
     onClose();

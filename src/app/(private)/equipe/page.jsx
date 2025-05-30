@@ -59,7 +59,10 @@ export default function EquipePage() {
     <div className="p-6">
       <AdicionarColaborador
         aberto={modalAberto}
-        aoFechar={() => setModalAberto(false)}
+        aoFechar={() => {
+          setModalAberto(false)
+          fetchColaboradores(); // Recarrega a lista de colaboradores após fechar o modal
+        }}
       />
 
       <h1 className="text-2xl font-bold mb-4">Equipe</h1>

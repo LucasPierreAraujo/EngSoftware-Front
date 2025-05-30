@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 export default function AdicionarColaborador({ aberto, aoFechar }) {
   const [formData, setFormData] = useState({
@@ -31,14 +31,15 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
   const handleSubmit = async () => {
     try {
       let response = await colaboradorService.adicionar(formData);
-      response = await response.json();
-      if(response.data?.error){
-        response.data.error.cpf ? alert("CPF inválido") : null;
-        response.data.error.nome_completo ? alert("Nome inválido") : null;
-        response.data.error.telefone ? alert("Telefone inválido") : null;
-        response.data.error.endereco ? alert("Endereço inválido") : null;
-        return alert("Reveja suas atidudes");
-      }
+      // response = await response.json();
+      // if(response.data?.error){
+      //   response.data.error.cpf ? alert("CPF inválido") : null;
+      //   response.data.error.nome_completo ? alert("Nome inválido") : null;
+      //   response.data.error.telefone ? alert("Telefone inválido") : null;
+      //   response.data.error.endereco ? alert("Endereço inválido") : null;
+      //   return alert("Reveja suas atidudes");
+      // } 
+      toast.success("Colaborador cadastrado com sucesso!");
       aoFechar(); // Fecha o modal
       setFormData({  // Limpa o formulário
         nome_completo: "",
@@ -60,11 +61,11 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
     } catch (error) {
       console.error("Erro ao cadastrar colaborador:", error);
       toast.error(error.message, {
-          description: "Erro ao cadsatrar colaborador",
-          style: {
-            backgroundColor: "var(--color-vermelho)",
-          },
-        });
+        description: "Erro ao cadsatrar colaborador",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
     }
   };
 

@@ -106,6 +106,7 @@ export default function ModalCadastro({ isOpen, onClose }) {
     };
     try{
       const response = await authService.register(data);
+      toast.info("Usuário cadastrado com sucesso!");
     }catch(error){
       const details = error.details || {};
       let errorMessage = ""

@@ -173,6 +173,7 @@ export default function Page() {
     //Ao final, tenta criar a obra
     try {
       const createObra = await obrasService.store(obraData);
+      toast.success("Obra criada com sucesso!");
       router.push("/obras");
     } catch (error) {
       console.log(error);
