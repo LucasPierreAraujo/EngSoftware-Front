@@ -127,15 +127,12 @@ export default function KanbanBoard({ etapa_id }) {
       activeId: activeId,
       columnId: toColumnId,
     })
-
-    await tarefasService.updateStatus(activeId, toColumnId);
-
-    if(toColumnId == '3'){
-      console.log("Tarefa concluída, removendo do estado local");
-    }
-
-    if(toColumnId == '2'){
-      console.log("Tarefa movida para Em Andamento, atualizando estado local");
+    if (toColumnId == '2') {
+      await tarefasService.iniciar(activeId);
+    } else if(toColumnId == '3'){
+      await tarefasService.concluir(activeId);
+    } else {
+      console.log("Tarefa movida para coluna:", statusMapping[toColumnId])
     }
   };
 

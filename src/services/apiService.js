@@ -44,7 +44,6 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    console.log(response)
     return handleResponse(response);
   },
   
@@ -54,7 +53,6 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    console.log(response)
     return handleResponse(response);
   },
   
@@ -74,4 +72,12 @@ export const api = {
     });
     return handleResponse(response);
   },
+  async patchByUrl(endpoint, id, action) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}/${id}/${action}`, {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: {},
+    });
+    return handleResponse(response);
+  }
 };

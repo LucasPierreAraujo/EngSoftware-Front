@@ -3,9 +3,7 @@
 import KanbanBoard from "@/components/ui/kanban-board";
 import ProjetoInfo from "@/components/ui/projeto-info";
 import { obrasService } from "@/services/obrasService";
-import { tarefasService } from "@/services/tarefasService";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -33,10 +31,10 @@ export default function page() {
           <Image alt="voltar" src={"/icons/back.png"} width={19} height={13} />
         </button>
         <ProjetoInfo 
-          dt_inicio={''}
-          estimativa={''}
-          orcamento={''}
-          responsavel={''} 
+          dt_inicio={data?.data_inicio ? new Date(data?.data_inicio).toLocaleDateString() : ''}
+          estimativa={data?.data_fim_previsto ? new Date(data.data_fim_previsto).toLocaleDateString() : ''}
+          orcamento={data?.orcamento ? (new Intl.NumberFormat("pt-BR", {style: "currency", currency: "BRL"}).format(data.orcamento)) : ''}
+          responsavel={data?.responsavel.nome_completo} 
         />
       </div>
  

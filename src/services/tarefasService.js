@@ -4,12 +4,12 @@ import { api } from "@/services/apiService";
 import { errorHandler } from "@/services/errorService";
 
 export const tarefasService = {
-  base_url: 'tarefas',
-  
+  base_url: "tarefas",
+
   async list(etapa_id) {
     try {
       const response = await api.get(`${this.base_url}?etapa_id=${etapa_id}`);
-      console.log(response)
+      console.log(response);
       return response?.data || [];
     } catch (error) {
       errorHandler.handle(error);
@@ -56,32 +56,31 @@ export const tarefasService = {
       throw error;
     }
   },
-  async updateStatus(id, status_id) 
-  {
+  async updateStatus(id, status_id) {
     try {
-      let response = await api.patch(`${this.base_url}`, id ,{ status_id });
+      let response = await api.patch(`${this.base_url}`, id, { status_id });
       return response || {};
     } catch (error) {
       errorHandler.handle(error);
       throw error;
     }
   },
-  async iniciar(id){
-    try{
-      const response = await api.patch(`${this.base_url}/${id}/iniciar`);
+  async iniciar(id) {
+    try {
+      const response = await api.patchByUrl(this.base_url, id, "iniciar");
       return response || {};
     } catch (error) {
       errorHandler.handle(error);
       throw error;
     }
   },
-  async concluir(id){
-    try{
-      const response = await api.patch(`${this.base_url}/${id}/concluir`);
+  async concluir(id) {
+    try {
+      const response = await api.patchByUrl(this.base_url, id, "concluir");
       return response || {};
     } catch (error) {
       errorHandler.handle(error);
       throw error;
     }
-  }
+  },
 };
