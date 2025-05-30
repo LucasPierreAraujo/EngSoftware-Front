@@ -18,6 +18,23 @@ import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 import NovoCartao from "@/app/(private)/obras/[id]/kanban/[slug]/modal/novo-cartao";
 import { tarefasService } from "@/services/tarefasService";
+import { etapasService } from "@/services/etapasService";
+
+// Mapeamento dos status
+const statusMapping = {
+  1: "Pendente",
+  2: "Em Andamento",
+  3: "Concluída",
+  4: "Arquivada",
+};
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 export default function KanbanBoard({ etapa_id }) {
   const [showModal, setShowModal] = useState(false);
@@ -26,46 +43,40 @@ export default function KanbanBoard({ etapa_id }) {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dataEditModalId, setDataEditModalId] = useState(null);
+  const [columnsState, setColumnsState] = useState({});
 
-  // Mapeamento dos IDs de status para nomes de colunas e títulos
-  const statusMapping = {
-    1: "Pendente",
-    2: "Em Andamento",
-    3: "Concluída",
-    4: "Arquivada",
-  };
-
-  const initialColumns = {
-    1: { title: statusMapping[1], items: [] },
-    2: { title: statusMapping[2], items: [] },
-    3: { title: statusMapping[3], items: [] },
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
 
   useEffect(() => {
     carregarTarefas();
-  }, [etapa_id]);
+  }, [showModal]);
 
   const carregarTarefas = async () => {
     try {
       setLoading(true);
-      const response = await tarefasService.list(etapa_id);
-      console.log("Tarefas carregadas:", response);
-      setTarefas(response);
+      const response = await etapasService.view(etapa_id);
 
-      // Organizar tarefas por status_id numérico
-      const novasColunas = { ...initialColumns };
+      const tarefasDaEtapa = response.tarefas || [];
 
-      response.forEach((tarefa) => {
-        const statusId = tarefa.status_id;
-        // Verifica se o statusId existe no mapeamento, caso contrário, define como 1 (Pendente)
-        if (statusMapping[statusId]) {
-          novasColunas[statusId].items.push(tarefa.id.toString());
-        } else {
-          novasColunas[1].items.push(tarefa.id.toString()); // Default para Pendente
-        }
+      const novasColunas = {};
+      Object.keys(statusMapping).forEach((id) => {
+        novasColunas[id] = { title: statusMapping[id], items: [] };
       });
 
-      console.log("Colunas organizadas:", novasColunas);
+      tarefasDaEtapa.forEach((tarefa) => {
+        const statusId = tarefa.status_id?.toString() || "1";
+        if (!novasColunas[statusId]) {
+          novasColunas[statusId] = {
+            title: statusMapping[statusId] || "Desconhecido",
+            items: [],
+          };
+        }
+        novasColunas[statusId].items.push(tarefa.id.toString());
+      });
+
+      setTarefas(tarefasDaEtapa);
       setColumnsState(novasColunas);
     } catch (error) {
       console.error("Erro ao carregar tarefas:", error);
@@ -73,15 +84,6 @@ export default function KanbanBoard({ etapa_id }) {
       setLoading(false);
     }
   };
-
-  const [columnsState, setColumnsState] = useState(initialColumns);
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
 
   const onDragStart = ({ active }) => {
     setActiveId(active.id);
@@ -97,34 +99,18 @@ export default function KanbanBoard({ etapa_id }) {
     const fromColumnId = Object.keys(columnsState).find((col) =>
       columnsState[col].items.includes(activeId)
     );
-    // overId pode ser o id de um item ou o id de uma coluna
     const toColumnId =
       Object.keys(columnsState).find((col) =>
         columnsState[col].items.includes(overId)
       ) || overId;
 
-    if (!fromColumnId || !toColumnId) return;
-    if (fromColumnId === toColumnId) return;
+    if (!fromColumnId || !toColumnId || fromColumnId === toColumnId) return;
 
-    // Converte o ID da coluna de destino para número para enviar ao backend
-    const targetStatusId = parseInt(toColumnId, 10);
-
-    // if (isNaN(targetStatusId)) {
-    //     console.error("ID de status inválido:", toColumnId);
-    //     // Em caso de ID inválido, podemos simplesmente retornar ou mostrar um erro, não recarregar tudo
-    //     return;
-    // }
-
-    // Salva o estado atual das colunas antes da atualização local
-    const previousColumnsState = { ...columnsState };
-
-    // Atualização otimista do estado local
     const fromItems = [...columnsState[fromColumnId].items];
     const toItems = [...columnsState[toColumnId].items];
 
     fromItems.splice(fromItems.indexOf(activeId), 1);
     const overIndex = toItems.indexOf(overId);
-
     if (overIndex >= 0) {
       toItems.splice(overIndex, 0, activeId);
     } else {
@@ -135,20 +121,22 @@ export default function KanbanBoard({ etapa_id }) {
       ...prev,
       [fromColumnId]: { ...prev[fromColumnId], items: fromItems },
       [toColumnId]: { ...prev[toColumnId], items: toItems },
-    }));
+    }));  
 
-    let response = await tarefasService.updateStatus(activeId, targetStatusId);
-    console.log(response);
+    console.log({
+      activeId: activeId,
+      columnId: toColumnId,
+    })
 
-    if (targetStatusId == 2) {
-      console.log("Andamento");
+    await tarefasService.updateStatus(activeId, toColumnId);
+
+    if(toColumnId == '3'){
+      console.log("Tarefa concluída, removendo do estado local");
     }
 
-    if (targetStatusId == 3) {
-      console.log("Concluida");
+    if(toColumnId == '2'){
+      console.log("Tarefa movida para Em Andamento, atualizando estado local");
     }
-
-    // Se chegou aqui, a atualização no backend foi bem-sucedida. Não precisa fazer mais nada.
   };
 
   function SortableItem({ id }) {
@@ -162,12 +150,7 @@ export default function KanbanBoard({ etapa_id }) {
     } = useSortable({ id });
 
     const tarefa = tarefas.find((t) => t.id.toString() === id);
-    console.log("Renderizando tarefa:", tarefa, "para id:", id);
-
-    if (!tarefa) {
-      console.log("Tarefa não encontrada para id:", id);
-      return null;
-    }
+    if (!tarefa) return null;
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -186,49 +169,20 @@ export default function KanbanBoard({ etapa_id }) {
       >
         <div className="flex items-center justify-between gap-2">
           <p className="font-semibold text-lg truncate">{tarefa.titulo}</p>
-          <div className="flex items-center gap-2">
-            <button
-              className="cursor-pointer"
-              onClick={() => {
-                setShowModal(true);
-                setDataEditModalId(tarefa);
-              }}
-            >
-              <Image
-                alt="edit"
-                src={"/icons/edit.png"}
-                width={24}
-                height={24}
-              />
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setShowModal(true);
+              setDataEditModalId(tarefa);
+            }}
+          >
+            <Image alt="edit" src="/icons/edit.png" width={24} height={24} />
+          </button>
         </div>
         <div className="text-sm">
-          <p className="py-1">{tarefa.descricao}</p>
-          <div className="flex gap-2 items-center">
-            <span>
-              {new Date(tarefa.created_at).getDate() < 10
-                ? "0" + new Date(tarefa.created_at).getDate()
-                : new Date(tarefa.created_at).getDate()}
-              /
-              {new Date(tarefa.created_at).getMonth() < 10
-                ? "0" + new Date(tarefa.created_at).getMonth()
-                : new Date(tarefa.created_at).getMonth()}
-              /{new Date(tarefa.created_at).getFullYear()}
-            </span>
-
-            {tarefa.data_fim != null && (
-              <span>
-                {new Date(tarefa.created_at).getDate() < 10
-                  ? "0" + new Date(tarefa.created_at).getDate()
-                  : new Date(tarefa.created_at).getDate()}
-                /
-                {new Date(tarefa.created_at).getMonth() < 10
-                  ? "0" + new Date(tarefa.created_at).getMonth()
-                  : new Date(tarefa.created_at).getMonth()}
-                /{new Date(tarefa.created_at).getFullYear()}
-              </span>
-            )}
+          <p className="py-1 text-sm text-gray-700 line-clamp-3 break-words overflow-hidden">{tarefa.descricao}</p>
+          <div className="flex gap-2 items-center text-xs text-gray-600">
+            <span>{formatDate(tarefa.created_at)}</span>
+            {tarefa.data_fim && <span>{formatDate(tarefa.data_fim)}</span>}
           </div>
         </div>
       </div>
@@ -237,9 +191,7 @@ export default function KanbanBoard({ etapa_id }) {
 
   function DroppableColumn({ id, children }) {
     const { setNodeRef } = useDroppable({ id });
-    // Use o statusMapping para obter o título da coluna
-    const columnTitle = statusMapping[id] || "Status Desconhecido";
-
+    const columnTitle = statusMapping[id] || "Desconhecido";
     return (
       <div ref={setNodeRef} className="flex flex-col gap-4 min-h-[100px]">
         {children}
@@ -281,6 +233,7 @@ export default function KanbanBoard({ etapa_id }) {
                 ))}
               </DroppableColumn>
             </SortableContext>
+
             <button
               className="mt-4 text-sm text-[#6C6994] hover:underline"
               onClick={() => {
@@ -290,10 +243,12 @@ export default function KanbanBoard({ etapa_id }) {
             >
               + Novo Cartão
             </button>
+
             {showModal && (
               <NovoCartao
-                columnId={targetColumn} // Passa o ID numérico da coluna
+                columnId={targetColumn}
                 data={dataEditModalId}
+                etapa_id={etapa_id}
                 onClose={() => setShowModal(false)}
                 onSuccess={() => {
                   setShowModal(false);
@@ -304,12 +259,13 @@ export default function KanbanBoard({ etapa_id }) {
           </div>
         ))}
       </div>
+
       <DragOverlay>
-        {activeId ? (
+        {activeId && (
           <div className="bg-white p-4 rounded-lg shadow-lg opacity-80">
             {tarefas.find((t) => t.id.toString() === activeId)?.titulo}
           </div>
-        ) : null}
+        )}
       </DragOverlay>
     </DndContext>
   );

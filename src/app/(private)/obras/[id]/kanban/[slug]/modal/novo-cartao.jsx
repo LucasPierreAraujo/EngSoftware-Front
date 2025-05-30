@@ -9,7 +9,7 @@ import { colaboradorService } from "@/services/colaboradorService";
 import { tarefasService } from "@/services/tarefasService";
 import { useEffect, useState } from "react";
 
-export default function NovoCartao({ columnId, onClose, data = null }) {
+export default function NovoCartao({ columnId, etapa_id, onClose, data = null }) {
   const [titulo, setTitulo] = useState("");
   const [equipe, setEquipe] = useState([]);
   const [orcamento, setOrcamento] = useState("");
@@ -37,10 +37,11 @@ export default function NovoCartao({ columnId, onClose, data = null }) {
   }, []);
 
   async function handleSubmit() {
+    console.log(colaboradores)
     const payload = {
       titulo,
       descricao,
-      etapa_id: columnId,
+      etapa_id: etapa_id,
       status_id: status,
       data_inicio: inicio,
       data_fim: termino,

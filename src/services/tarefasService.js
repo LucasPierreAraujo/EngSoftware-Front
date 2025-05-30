@@ -9,6 +9,7 @@ export const tarefasService = {
   async list(etapa_id) {
     try {
       const response = await api.get(`${this.base_url}?etapa_id=${etapa_id}`);
+      console.log(response)
       return response?.data || [];
     } catch (error) {
       errorHandler.handle(error);
@@ -58,8 +59,7 @@ export const tarefasService = {
   async updateStatus(id, status_id) 
   {
     try {
-      const response = await api.patch(`${this.base_url}`, id ,{ status_id });
-      consoe
+      let response = await api.patch(`${this.base_url}`, id ,{ status_id });
       return response || {};
     } catch (error) {
       errorHandler.handle(error);
