@@ -84,7 +84,7 @@ export default function NovaFase({ onClose }) {
         nome: nome,
         data_inicio: inicio,
         data_fim_previsto: termino,
-        orcamento: valor.replace(/\D/g, ""),
+        orcamento: valor.replace(/\D/g, "") / 100,
         obra_id: id,
         responsavel_id: responsavel,
       };
