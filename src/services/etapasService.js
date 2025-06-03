@@ -9,7 +9,7 @@ export const etapasService = {
   async listByObra(obraId, page = 1) {
     try {
       const response = await api.get(`${this.base_url}?obra_id=${obraId}&page=${page}`);
-      return response?.data || [];
+      return response || {};
     } catch (error) {
       errorHandler.handle(error);
       throw error;

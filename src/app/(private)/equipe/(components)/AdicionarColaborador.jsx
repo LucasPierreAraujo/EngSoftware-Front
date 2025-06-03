@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
 import { toast } from "sonner";
+import Loader from '@/components/ui/loader';
 
 export default function AdicionarColaborador({ aberto, aoFechar }) {
   const [formData, setFormData] = useState({
@@ -23,12 +24,15 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
     uf: "",
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       let response = await colaboradorService.adicionar(formData);
       // response = await response.json();
@@ -61,15 +65,20 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
     } catch (error) {
       console.error("Erro ao cadastrar colaborador:", error);
       toast.error(error.message, {
-        description: "Erro ao cadsatrar colaborador",
+        description: "Erro ao cadastrar colaborador",
         style: {
           backgroundColor: "var(--color-vermelho)",
         },
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   if (!aberto) return null;
+  if (isLoading) {
+    return <Loader/>
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-white/5 backdrop-blur-xs flex items-center justify-center">

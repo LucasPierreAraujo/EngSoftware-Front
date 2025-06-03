@@ -10,6 +10,7 @@ import {toast} from "sonner"
 import ModalEsqueceuSenha from "./(esqueceu-senha)/esqueceu-senha-modal";
 import Modal from "@/components/layout/modal";
 import ModalCadastro from "./(cadastro)/cadastro-modal";
+import Loader from '@/components/ui/loader';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -85,13 +86,16 @@ export default function LoginForm() {
         message:
           "Email ou senha incorretos. Por favor tente novamente.",
       });
+    }
+    finally {
       setLoadingSubmit(false);
     }
     disableErrorMessage();
-    setLoadingSubmit(false);
   }
   console.log(errorSubmit)
-
+  if (loadingSubmit) {
+  return <Loader/>
+}
   return (
     <form className="w-full" onSubmit={handleSubmit}>
       <InputField

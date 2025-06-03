@@ -6,41 +6,59 @@ import Pagination from "@/components/ui/pagination";
 import NovaFase from "./modal/nova-fase";
 import { useState, useEffect } from "react";
 import { Play, Clock, CheckCircle, AlertTriangle, Archive } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { obrasService } from "@/services/obrasService";
 import { etapasService } from "@/services/etapasService";
 import Image from "next/image";
-import { DropdownContent, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui/DropdownMenu";
+import {
+  DropdownContent,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@/components/ui/DropdownMenu";
+import Loader from "@/components/ui/loader";
 
 export default function Page() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
   const [showModal, setShowModal] = useState(false);
+  const currentPage = Number(searchParams.get("page")) || 1;
   const [obra, setObra] = useState(null);
   const [etapas, setEtapas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paginationInfo, setPaginationInfo] = useState({
+    total: 0,
+    lastPage: 1,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Buscar dados da obra
-        const obraData = await obrasService.view(id);
-        setObra(obraData);
-
-        // Buscar etapas da obra
-        const etapasData = await etapasService.listByObra(id, 1);
-        setEtapas(etapasData);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [id]);
+  }, [id, currentPage]);
+  
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Buscar dados da obra
+      const obraData = await obrasService.view(id);
+      setObra(obraData);
+
+      // Buscar etapas da obra
+      const etapasData = await etapasService.listByObra(id, currentPage);
+      setEtapas(etapasData.data);
+      setPaginationInfo({
+        total: etapasData.total,
+        lastPage: etapasData.last_page,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModalClose = () => {
     setShowModal(false);
+    fetchData();
   };
 
   const getStatusIcon = (status) => {
@@ -74,16 +92,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center w-full h-full">
-        <Image
-          alt="loading gif"
-          src={"/gif/loading.png"}
-          width={100}
-          height={100}
-        />
-      </div>
-    );
+    return <Loader />;
   }
 
   console.log(obra);
@@ -121,84 +130,89 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-  {etapas.map((etapa) => (
-    <tr
-      key={etapa.id}
-      className="border-t hover:bg-zinc-200 transition-all duration-300"
-    >
-      <td
-        onClick={() =>
-          (window.location.href = `/obras/${id}/kanban/${etapa.id}`)
-        }
-        className="p-4 text-sm cursor-pointer hover:underline"
-      >
-        {etapa.nome}
-      </td>
-      <td className="p-4 text-sm">{etapa.responsavel.nome_completo}</td>
-      <td className="p-4 text-sm">
-        {new Date(etapa.data_fim_previsto).toLocaleDateString()}
-      </td>
-      <td className="p-4 text-sm">
-        R$ {etapa.orcamento?.toLocaleString() || "0"}
-      </td>
-      <td className="p-4 text-sm">
-        <span className={`flex gap-2 ${getStatusColor(etapa.status.nome)}`}>
-          {getStatusIcon(etapa.status.nome)}
-          {etapa.status.nome}
-        </span>
-      </td>
-      <td className="p-4 text-sm ">
-        <DropdownMenu>
-          {({ open, setOpen }) => (
-            <>
-              <DropdownTrigger
-                setOpen={(open) => {
-                  setOpen(open);
-                }}
-                onClick={(e) => e.stopPropagation()} 
+            {etapas.map((etapa) => (
+              <tr
+                key={etapa.id}
+                className="border-t hover:bg-zinc-200 transition-all duration-300"
               >
-                ⋮
-              </DropdownTrigger>
-              <DropdownContent open={open}>
-                <DropdownItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert(`Excluir ${etapa.nome}`);
-                  }}
+                <td
+                  onClick={() =>
+                    (window.location.href = `/obras/${id}/kanban/${etapa.id}`)
+                  }
+                  className="p-4 text-sm cursor-pointer hover:underline"
                 >
-                  Arquivar
-                </DropdownItem>
-                
-                <DropdownItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert(`Editar ${etapa.nome}`);
-                  }}
-                >
-                  Editar
-                </DropdownItem>
-                <DropdownItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert(`Excluir ${etapa.nome}`);
-                  }}
-                >
-                  Excluir
-                </DropdownItem>
-              </DropdownContent>
-            </>
-          )}
-        </DropdownMenu>
-      </td>
-    </tr>
-  ))}
-</tbody>
+                  {etapa.nome}
+                </td>
+                <td className="p-4 text-sm">
+                  {etapa.responsavel.nome_completo}
+                </td>
+                <td className="p-4 text-sm">
+                  {new Date(etapa.data_fim_previsto).toLocaleDateString()}
+                </td>
+                <td className="p-4 text-sm">
+                  R$ {etapa.orcamento?.toLocaleString() || "0"}
+                </td>
+                <td className="p-4 text-sm">
+                  <span
+                    className={`flex gap-2 ${getStatusColor(
+                      etapa.status.nome
+                    )}`}
+                  >
+                    {getStatusIcon(etapa.status.nome)}
+                    {etapa.status.nome}
+                  </span>
+                </td>
+                <td className="p-4 text-sm ">
+                  <DropdownMenu>
+                    {({ open, setOpen }) => (
+                      <>
+                        <DropdownTrigger
+                          setOpen={(open) => {
+                            setOpen(open);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          ⋮
+                        </DropdownTrigger>
+                        <DropdownContent open={open}>
+                          <DropdownItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert(`Excluir ${etapa.nome}`);
+                            }}
+                          >
+                            Arquivar
+                          </DropdownItem>
 
+                          <DropdownItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert(`Editar ${etapa.nome}`);
+                            }}
+                          >
+                            Editar
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert(`Excluir ${etapa.nome}`);
+                            }}
+                          >
+                            Excluir
+                          </DropdownItem>
+                        </DropdownContent>
+                      </>
+                    )}
+                  </DropdownMenu>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
       <div className="flex items-center justify-center pt-6">
-        <Pagination totalPages={10} />
+        <Pagination totalPages={paginationInfo.lastPage} />
       </div>
 
       {showModal && <NovaFase onClose={handleModalClose} obraId={id} />}

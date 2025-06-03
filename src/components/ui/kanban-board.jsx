@@ -19,6 +19,8 @@ import Image from "next/image";
 import NovoCartao from "@/app/(private)/obras/[id]/kanban/[slug]/modal/novo-cartao";
 import { tarefasService } from "@/services/tarefasService";
 import { etapasService } from "@/services/etapasService";
+import Loader from "./loader";
+import { toast } from "sonner";
 
 // Mapeamento dos status
 const statusMapping = {
@@ -121,18 +123,31 @@ export default function KanbanBoard({ etapa_id }) {
       ...prev,
       [fromColumnId]: { ...prev[fromColumnId], items: fromItems },
       [toColumnId]: { ...prev[toColumnId], items: toItems },
-    }));  
+    }));
 
     console.log({
       activeId: activeId,
       columnId: toColumnId,
-    })
-    if (toColumnId == '2') {
-      await tarefasService.iniciar(activeId);
-    } else if(toColumnId == '3'){
-      await tarefasService.concluir(activeId);
-    } else {
-      console.log("Tarefa movida para coluna:", statusMapping[toColumnId])
+    });
+    setLoading(true);
+    try {
+      if (toColumnId == "2") {
+        await tarefasService.iniciar(activeId);
+      } else if (toColumnId == "3") {
+        await tarefasService.concluir(activeId);
+      } else {
+        console.log("Tarefa movida para coluna:", statusMapping[toColumnId]);
+        await tarefasService.update(activeId, { status_id: toColumnId });
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar o status da tarefa!", {
+        description: "Erro ao atualiza tarefa",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,7 +191,9 @@ export default function KanbanBoard({ etapa_id }) {
           </button>
         </div>
         <div className="text-sm">
-          <p className="py-1 text-sm text-gray-700 line-clamp-3 break-words overflow-hidden">{tarefa.descricao}</p>
+          <p className="py-1 text-sm text-gray-700 line-clamp-3 break-words overflow-hidden">
+            {tarefa.descricao}
+          </p>
           <div className="flex gap-2 items-center text-xs text-gray-600">
             <span>{formatDate(tarefa.created_at)}</span>
             {tarefa.data_fim && <span>{formatDate(tarefa.data_fim)}</span>}
@@ -197,11 +214,7 @@ export default function KanbanBoard({ etapa_id }) {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Image src="/gif/loading.png" alt="Loading" width={100} height={100} />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

@@ -8,6 +8,7 @@ import { useErrorsHooks } from "@/hooks/error-message-hook";
 import { SelectOne } from "@/components/ui/select-one";
 import { authService } from "@/services/authService";
 import { toast } from "sonner";
+import Loader from "@/components/ui/loader";
 
 export default function ModalCadastro({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -22,6 +23,7 @@ export default function ModalCadastro({ isOpen, onClose }) {
   const [confirmeSenha, setConfirmeSenha] = useState("");
   const [cargo, setCargo] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   function capitalizeFirstLetter(text) {
     return text
@@ -104,50 +106,56 @@ export default function ModalCadastro({ isOpen, onClose }) {
       password: senha,
       type: cargo,
     };
-    try{
+    setIsLoading(true);
+    try {
       const response = await authService.register(data);
       toast.info("Usuário cadastrado com sucesso!");
-    }catch(error){
+    } catch (error) {
       const details = error.details || {};
-      let errorMessage = ""
+      let errorMessage = "";
       for (const [key, value] of Object.entries(details)) {
         errorMessage += `${key}: ${value.join(", ")}\n`;
       }
-      toast.error(`Erro ao cadastrar usuário. Verifique os campos: ${errorMessage}`);
+      toast.error(
+        `Erro ao cadastrar usuário. Verifique os campos: ${errorMessage}`
+      );
       console.error("Erro ao formatar os dados:", error);
       return updateErrorMessage({
         title: "formato",
-        message: "Erro ao formatar os dados. Verifique os campos."
+        message: "Erro ao formatar os dados. Verifique os campos.",
       });
       // if(response.status == 422){
       //   const data = await response.json();
       //   if(data.errors?.email){
-          
+
       //     return updateErrorMessage({
       //       title: "email",
       //       message: "Este email já está cadastrado"
       //     });
       //   }
-  
+
       //   if(data.errors?.phone){
-          
+
       //     return updateErrorMessage({
-      //       title: "telefone", 
+      //       title: "telefone",
       //       message: "Este telefone já está cadastrado"
       //     });
       //   }
       // }
+    } finally {
+      setIsLoading(false);
     }
     onClose();
   }
-
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-3xl font-bold text-[#2A2567]">Crie sua conta</h2>
       <p className="text-sm text-[#141414]">
         Crie sua conta para acessar o sistema
       </p>
-
 
       <InputField
         label="CPF ou CNPJ"
@@ -220,11 +228,7 @@ export default function ModalCadastro({ isOpen, onClose }) {
           },
         ]}
         value={cargo}
-        onChange={(e) =>
-          setCargo(
-            capitalizeFirstLetter(e)
-          )
-        }
+        onChange={(e) => setCargo(capitalizeFirstLetter(e))}
         placeholder="Digite seu cargo"
         // error={errorMessage?.title === "cargo" ? errorMessage.message : null}
       />

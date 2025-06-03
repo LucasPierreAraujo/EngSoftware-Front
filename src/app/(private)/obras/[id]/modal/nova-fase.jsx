@@ -3,22 +3,44 @@
 import Modal from "@/components/layout/modal";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
+import Loader from '@/components/ui/loader';
 import { SelectOne } from "@/components/ui/select-one";
+import { colaboradorService } from '@/services/colaboradorService';
+import { etapasService } from "@/services/etapasService";
 import Image from "next/image";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function NovaFase({ onClose }) {
-  const [fase, setFase] = useState("");
+  const router = useRouter();
+  const [nome, setNome] = useState("");
   const [responsavel, setResponsavel] = useState("");
-  const [cargo, setCargo] = useState("");
   const [valor, setValor] = useState("");
   const [inicio, setInicio] = useState("");
   const [termino, setTermino] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [colaboradores, setColaboradores] = useState([]);
+  const { id } = useParams();
+
+  const fetchColaboradores = async () => {
+    setIsLoading(true);
+    try {
+      const response = await colaboradorService.listar();
+      setColaboradores(response);
+    } catch (error) {
+      console.error("Erro ao buscar colaboradores:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchColaboradores()
+  }, [])
 
   const [errors, setErrors] = useState({
-    fase: "",
+    nome: "",
     responsavel: "",
-    cargo: "",
     valor: "",
     inicio: "",
     termino: "",
@@ -34,10 +56,9 @@ export default function NovaFase({ onClose }) {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!fase) newErrors.fase = "Nome da fase é obrigatório";
+    if (!nome) newErrors.nome = "Nome da fase é obrigatório";
     if (!responsavel)
       newErrors.responsavel = "Responsável técnico é obrigatório";
-    if (!cargo) newErrors.cargo = "Cargo é obrigatório";
     if (!valor) newErrors.valor = "Valor da fase é obrigatório";
     if (!inicio) newErrors.inicio = "Data de início é obrigatória";
     if (!termino) newErrors.termino = "Previsão de término é obrigatória";
@@ -47,11 +68,49 @@ export default function NovaFase({ onClose }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!id) {
+      console.log("Não foi registrado o id da obra!");
+      toast.error("Erro ao identificar a obra", {
+        description: "Erro ao identificar colaborador",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
+      return;
+    }
     if (validateForm()) {
-      onClose();
+      const form = {
+        nome: nome,
+        data_inicio: inicio,
+        data_fim_previsto: termino,
+        orcamento: valor.replace(/\D/g, ""),
+        obra_id: id,
+        responsavel_id: responsavel,
+      };
+      setIsLoading(true);
+      try {
+        const response = await etapasService.store(form);
+        toast.info("Fase cadastrada com sucesso!");
+        router.push(`/obras/${id}`);
+        onClose();
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message, {
+          description: "Erro ao identificar colaborador",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
+
+  if (isLoading) {
+    return <Loader/>
+  }
 
   return (
     <Modal onClose={onClose}>
@@ -65,46 +124,32 @@ export default function NovaFase({ onClose }) {
             label="Nome da fase"
             type="text"
             name="fase"
-            value={fase}
-            onChange={(e) => setFase(e.target.value)}
+            value={nome}
+            onChange={(e) => setNome(e)}
             placeholder="xxxxxxxxxx"
             error={errors.fase}
           />
         </div>
 
         <div className="flex gap-3">
-          <InputField
-            label="Responsável Técnico"
-            type="text"
-            name="responsavel"
-            value={responsavel}
-            onChange={(e) => setResponsavel(e.target.value)}
-            placeholder="xxxxxxxxxx"
-            error={errors.responsavel}
-          />
-
-          <InputField
-            label="Cargo"
-            type="text"
-            name="cargo"
-            value={cargo}
-            onChange={(e) => setCargo(e.target.value)}
-            placeholder="xxxxxxxxxx"
-            error={errors.cargo}
-          />
+          <SelectOne label="Responsável pela Fase" options={colaboradores.map((col) => {
+            return {
+              name: col.nome_completo,
+              value: col.id
+            }
+          }) } onChange={(e) => setResponsavel(e)} error={errors.responsavel} />
         </div>
 
         <div className="flex gap-3">
           <InputField
-            label="Valor da fase"
+            label="Orçamento da fase"
             type="text"
             name="valor"
             value={valor}
-            onChange={(e) => setValor(formatCurrency(e.target.value))}
+            onChange={(e) => setValor(formatCurrency(e))}
             placeholder="R$ xx.xxx,xx"
             error={errors.valor}
           />
-          <SelectOne label={"Status"} />
         </div>
 
         <div className="flex gap-3">
@@ -113,7 +158,7 @@ export default function NovaFase({ onClose }) {
             type="date"
             name="inicio"
             value={inicio}
-            onChange={(e) => setInicio(e.target.value)}
+            onChange={(e) => setInicio(e)}
             error={errors.inicio}
           />
           <InputField
@@ -121,7 +166,7 @@ export default function NovaFase({ onClose }) {
             type="date"
             name="termino"
             value={termino}
-            onChange={(e) => setTermino(e.target.value)}
+            onChange={(e) => setTermino(e)}
             error={errors.termino}
           />
         </div>

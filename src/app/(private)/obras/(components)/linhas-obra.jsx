@@ -26,6 +26,7 @@ export function LinhaObraConcluida({
   responsavel,
   data_inicio,
   data_fim,
+  id
 }) {
   return (
     <Link href={`/obras/${id}`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">
@@ -47,6 +48,7 @@ export function LinhaObraArquivada({
   responsavel,
   data_inicio,
   data_arquivamento,
+  id
 }) {
   return (
     <Link href={`/obras/${id}`}  className="flex justify-between items-center gap-4 w-full odd:bg-fundo-tabela hover:bg-gray-200/30 px-4 text-[14px]">

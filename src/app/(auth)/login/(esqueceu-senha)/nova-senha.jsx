@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useErrorsHooks } from "@/hooks/error-message-hook";
 import { authService } from "@/services/authService";
 import { toast } from "sonner";
+import Loader from '@/components/ui/loader';
 
 export default function ModalNovaSenha({ isOpen, onClose }) {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function ModalNovaSenha({ isOpen, onClose }) {
 
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmeNovaSenha, setConfirmeNovaSenha] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { errorMessage, updateErrorMessage, disableErrorMessage } =
     useErrorsHooks();
@@ -44,6 +46,7 @@ export default function ModalNovaSenha({ isOpen, onClose }) {
 
     if (!validatePasswords(novaSenha, confirmeNovaSenha)) return;
 
+    setIsLoading(true)
     try {
       const response = await authService.resetPassword(
         sessionStorage.getItem("email_reset"),
@@ -61,7 +64,12 @@ export default function ModalNovaSenha({ isOpen, onClose }) {
           backgroundColor: "var(--color-vermelho)",
         },
       });
+    } finally {
+      setIsLoading(false)
     }
+  }
+  if (isLoading) {
+    return <Loader/>
   }
 
   return (

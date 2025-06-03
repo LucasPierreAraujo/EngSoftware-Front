@@ -7,20 +7,25 @@ import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import AdicionarColaborador from "./(components)/AdicionarColaborador.jsx";
 import { colaboradorService } from "@/services/colaboradorService";
+import Loader from "@/components/ui/loader.jsx";
 
 export default function EquipePage() {
   const [menuAberto, setMenuAberto] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [colaboradores, setColaboradores] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Buscar colaboradores do backend
   useEffect(() => {
     async function fetchColaboradores() {
+      setIsLoading(true);
       try {
         let response = await colaboradorService.listar();
         setColaboradores(response);
       } catch (error) {
         console.error("Erro ao carregar colaboradores", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -32,6 +37,7 @@ export default function EquipePage() {
   };
 
   const alterarStatus = async (id, novoStatus) => {
+    setIsLoading(true);
     try {
       await colaboradorService.atualizar(id, { status: novoStatus });
       setColaboradores((prev) =>
@@ -42,25 +48,34 @@ export default function EquipePage() {
       setMenuAberto(null);
     } catch (error) {
       console.error("Erro ao alterar status", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const excluirColaborador = async (id) => {
+    setIsLoading(true);
     try {
       await colaboradorService.deletar(id);
       setColaboradores((prev) => prev.filter((colab) => colab.id !== id));
       setMenuAberto(null);
     } catch (error) {
       console.error("Erro ao excluir colaborador", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Loader/>
+  }
 
   return (
     <div className="p-6">
       <AdicionarColaborador
         aberto={modalAberto}
         aoFechar={() => {
-          setModalAberto(false)
+          setModalAberto(false);
           fetchColaboradores(); // Recarrega a lista de colaboradores após fechar o modal
         }}
       />
@@ -87,7 +102,10 @@ export default function EquipePage() {
 
       <div className="divide-y mt-2">
         {colaboradores.map((colab, idx) => (
-          <div key={colab.id} className="grid grid-cols-5 py-3 items-center relative">
+          <div
+            key={colab.id}
+            className="grid grid-cols-5 py-3 items-center relative"
+          >
             <div>{colab.apelido}</div>
             <div>{colab.cargo}</div>
             <div>{colab.setor}</div>

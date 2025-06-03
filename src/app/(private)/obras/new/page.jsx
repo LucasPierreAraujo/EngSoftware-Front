@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
 import { SelectOne } from "@/components/ui/select-one";
+import Loader from '@/components/ui/loader';
 
 export default function Page() {
   const [errors, setErrors] = useState({});
@@ -17,6 +18,7 @@ export default function Page() {
   const [colaboradores, setColaboradores] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [novoCliente, setNovoCliente] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [idCliente, setIdCliente] = useState(undefined);
   const router = useRouter();
 
@@ -29,19 +31,25 @@ export default function Page() {
   //Rodar no início para buscar clientes e colaboradores
   useEffect(() => {
     const fetchColaboradores = async () => {
+      setIsLoading(true);
       try {
         const response = await colaboradorService.listar();
         setColaboradores(response);
       } catch (error) {
         console.error("Erro ao buscar colaboradores:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     const fetchClientes = async () => {
+      setIsLoading(true);
       try {
         const response = await clienteService.list();
         setClientes(response);
       } catch (error) {
         console.error("Erro ao buscar clientes:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchColaboradores();
@@ -126,7 +134,7 @@ export default function Page() {
         obj[key] = rawdata[key];
         return obj;
       }, {});
-    
+
     //Valida o formulário de Obra, se tiver problemas, retorna e mostra mensagem ao usuário antes de verificar cliente
     const error = validateFormObra(obraData);
     if (error) {
@@ -154,6 +162,7 @@ export default function Page() {
           return obj;
         }, {});
       try {
+        setIsLoading(true);
         const createClient = await clienteService.store(
           clientData.nome,
           clientData
@@ -166,6 +175,7 @@ export default function Page() {
       } catch (error) {
         console.log(error);
         toast.error("Erro ao criar cliente: " + error.message);
+        setIsLoading(false);
         return;
       }
     }
@@ -178,6 +188,8 @@ export default function Page() {
     } catch (error) {
       console.log(error);
       toast.error("Erro ao criar obra: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -189,6 +201,10 @@ export default function Page() {
     setErrors({});
     setValid(true);
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="h-full">

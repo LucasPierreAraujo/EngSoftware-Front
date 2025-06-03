@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { obrasService } from "@/services/obrasService";
 import { toast } from "sonner";
 import HeaderObras from "./(components)/header-obras";
+import Loader from '@/components/ui/loader';
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -50,7 +51,7 @@ export default function Page() {
   }, [currentStatus, currentPage]);
 
   if (loading) {
-    return <div className="text-center p-4">Carregando...</div>;
+    return <Loader/>;
   }
 
   return (
