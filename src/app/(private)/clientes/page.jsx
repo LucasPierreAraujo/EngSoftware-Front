@@ -1,81 +1,46 @@
 "use client";
 
+import Loader from '@/components/ui/loader';
 import Pagination from "@/components/ui/pagination";
+import { clienteService } from '@/services/clienteService';
 import Image from "next/image";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function page() {
-    const reports = [
-        {
-          id: 1,
-          cliente: "José da Silva",
-          obra: "Praça da FAP",
-          cidade: "Juazeiro do Norte / CE",
-          telefone: "(88)99999-9999",
-        },
-        {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-          {
-            id: 1,
-            cliente: "José da Silva",
-            obra: "Praça da FAP",
-            cidade: "Juazeiro do Norte / CE",
-            telefone: "(88)99999-9999",
-          },
-    ]
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const [isLoading, setIsLoading] = useState(true);
+  const [clientes, setClientes] = useState([]);
+  const [paginationInfo, setPaginationInfo] = useState({
+    total: 0,
+    lastPage: 1
+  })
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true)
+      try {
+        const response = await clienteService.list();
+        setClientes(response.data)
+        setPaginationInfo({
+          total: response.total,
+          lastPage: response.last_page,
+        });
+      } catch (error) {
+        console.log(error)
+        toast.error(error.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchData();
+
+  }, [currentPage])
+
+  if (isLoading) {
+    return <Loader/>
+  }
   return (
     <section className="p-5 space-y-8">
       <div className="w-full flex  items-center justify-between ">
@@ -90,19 +55,19 @@ export default function page() {
                 <thead>
                   <tr>
                     <th className="p-4 font-bold text-sm">CLIENTE</th>
-                    <th className="p-4 font-bold text-sm">OBRA ATIVA</th>
-                    <th className="p-4 font-bold text-sm">CIDADE / UF</th>
                     <th className="p-4 font-bold text-sm">TELEFONE</th>
+                    <th className="p-4 font-bold text-sm">ENDEREÇO</th>
+                    <th className="p-4 font-bold text-sm">CIDADE</th>
                     <th className="p-4 font-bold text-sm">AÇÕES</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {reports.map((report) => (
-                    <tr key={report.id} className="border-t">
-                      <td className="p-4 text-sm">{report.cliente}</td>
-                      <td className="p-4 text-sm">{report.obra}</td>
-                      <td className="p-4 text-sm">{report.cidade}</td>
-                      <td className="p-4 text-sm">{report.telefone}</td>
+                  {clientes.map((cliente) => (
+                    <tr key={cliente.id} className="border-t">
+                      <td className="p-4 text-sm">{cliente.nome}</td>
+                      <td className="p-4 text-sm">{cliente.telefone}</td>
+                      <td className="p-4 text-sm">{cliente.endereco}</td>
+                      <td className="p-4 text-sm">{cliente.cidade}</td>
                       <td className="p-4 text-sm">
                         <button className="text-xl px-2 py-1">...</button>
                       </td>
@@ -113,7 +78,7 @@ export default function page() {
             </div>
       
             <div className="flex justify-center pt-4">
-              <Pagination totalPages={10} />
+              <Pagination totalPages={paginationInfo.lastPage} />
             </div>
     </section>
   );
