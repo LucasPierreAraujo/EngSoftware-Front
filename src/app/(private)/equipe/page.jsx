@@ -7,37 +7,32 @@ import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import AdicionarColaborador from "./(components)/AdicionarColaborador.jsx";
 import { colaboradorService } from "@/services/colaboradorService";
-import Loader from "@/components/ui/loader.jsx";
 
 export default function EquipePage() {
   const [menuAberto, setMenuAberto] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [colaboradores, setColaboradores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
 
   // Buscar colaboradores do backend
   useEffect(() => {
     async function fetchColaboradores() {
-      setIsLoading(true);
       try {
         let response = await colaboradorService.listar();
         setColaboradores(response);
       } catch (error) {
         console.error("Erro ao carregar colaboradores", error);
-      } finally {
-        setIsLoading(false);
       }
     }
 
     fetchColaboradores();
-  }, []);
+  }, [modalAberto]);
 
   const toggleMenu = (index) => {
     setMenuAberto(menuAberto === index ? null : index);
   };
 
   const alterarStatus = async (id, novoStatus) => {
-    setIsLoading(true);
     try {
       await colaboradorService.atualizar(id, { status: novoStatus });
       setColaboradores((prev) =>
@@ -48,35 +43,33 @@ export default function EquipePage() {
       setMenuAberto(null);
     } catch (error) {
       console.error("Erro ao alterar status", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const excluirColaborador = async (id) => {
-    setIsLoading(true);
     try {
       await colaboradorService.deletar(id);
       setColaboradores((prev) => prev.filter((colab) => colab.id !== id));
       setMenuAberto(null);
     } catch (error) {
       console.error("Erro ao excluir colaborador", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <Loader/>
+  async function apagar() {
+    let response = await colaboradorService.deletar(id)
+    setModalAberto(false)
+    console.log(response)
   }
 
   return (
     <div className="p-6">
       <AdicionarColaborador
         aberto={modalAberto}
+        dados={colaboradorSelecionado}
         aoFechar={() => {
           setModalAberto(false);
-          fetchColaboradores(); // Recarrega a lista de colaboradores após fechar o modal
+          setColaboradorSelecionado(null); // Reseta o colaborador selecionado
         }}
       />
 
@@ -104,9 +97,18 @@ export default function EquipePage() {
         {colaboradores.map((colab, idx) => (
           <div
             key={colab.id}
-            className="grid grid-cols-5 py-3 items-center relative"
+            className={`grid grid-cols-5 py-3 items-center relative ${
+              idx % 2 === 0 ? "bg-white" : "bg-blue-50"
+            }`}
           >
-            <div>{colab.apelido}</div>
+            <button
+              onClick={() => {
+                setColaboradorSelecionado(colab);
+                setModalAberto(true);
+              }}
+            >
+              {colab.apelido}
+            </button>
             <div>{colab.cargo}</div>
             <div>{colab.setor}</div>
             <div>{colab.cpf}</div>
@@ -133,7 +135,16 @@ export default function EquipePage() {
                 <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => excluirColaborador(colab.id)}
+                    onClick={() => {
+                      setColaboradorSelecionado(colab);
+                      setModalAberto(true);
+                    }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
+                    onClick={() => apagar(colab.id)}
                   >
                     Excluir
                   </button>

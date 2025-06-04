@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
 import { toast } from "sonner";
-import Loader from '@/components/ui/loader';
 
-export default function AdicionarColaborador({ aberto, aoFechar }) {
+export default function AdicionarColaborador({
+  aberto,
+  aoFechar,
+  dados = null,
+}) {
   const [formData, setFormData] = useState({
     nome_completo: "",
     apelido: "",
     cpf: "",
     cargo: "",
-    setor: "",
-    vinculo: "",
+    setor: "construção",
+    vinculo: "1",
     matricula: "",
     data_admissao: "",
     email: "",
@@ -24,7 +27,64 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
     uf: "",
   });
 
-  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    if (dados != null) {
+      setFormData({
+        nome_completo: dados.nome_completo || "",
+        apelido: dados.apelido || "",
+        cpf: dados.cpf || "",
+        cargo: dados.cargo || "",
+        setor: dados.setor || "",
+        vinculo: dados.vinculo || "",
+        matricula: dados.matricula || "",
+        data_admissao: dados.data_admissao || "",
+        email: dados.email || "",
+        telefone: dados.telefone || "",
+        cep: dados.cep || "",
+        endereco: dados.endereco || "",
+        complemento: dados.complemento || "",
+        municipio: dados.municipio || "",
+        uf: dados.uf || "",
+      });
+    }
+  }, [dados]);
+
+  function updateClient() {
+    const { id } = dados;
+    colaboradorService
+      .atualizar(id, formData)
+      .then(() => {
+        toast.success("Colaborador atualizado com sucesso!");
+        aoFechar(); // Fecha o modal
+        setFormData({
+          // Limpa o formulário
+          nome_completo: "",
+          apelido: "",
+          cpf: "",
+          cargo: "",
+          setor: "construção",
+          vinculo: "1",
+          matricula: "",
+          data_admissao: "",
+          email: "",
+          telefone: "",
+          cep: "",
+          endereco: "",
+          complemento: "",
+          municipio: "",
+          uf: "",
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao atualizar colaborador:", error);
+        toast.error(error.message, {
+          description: "Erro ao atualizar colaborador",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
+      });
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +92,6 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
     try {
       let response = await colaboradorService.adicionar(formData);
       // response = await response.json();
@@ -42,16 +101,17 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
       //   response.data.error.telefone ? alert("Telefone inválido") : null;
       //   response.data.error.endereco ? alert("Endereço inválido") : null;
       //   return alert("Reveja suas atidudes");
-      // } 
+      // }
       toast.success("Colaborador cadastrado com sucesso!");
       aoFechar(); // Fecha o modal
-      setFormData({  // Limpa o formulário
+      setFormData({
+        // Limpa o formulário
         nome_completo: "",
         apelido: "",
         cpf: "",
         cargo: "",
-        setor: "",
-        vinculo: "",
+        setor: "construção",
+        vinculo: "1",
         matricula: "",
         data_admissao: "",
         email: "",
@@ -65,20 +125,15 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
     } catch (error) {
       console.error("Erro ao cadastrar colaborador:", error);
       toast.error(error.message, {
-        description: "Erro ao cadastrar colaborador",
+        description: "Erro ao cadsatrar colaborador",
         style: {
           backgroundColor: "var(--color-vermelho)",
         },
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   if (!aberto) return null;
-  if (isLoading) {
-    return <Loader/>
-  }
 
   return (
     <div className="fixed inset-0 z-50 bg-white/5 backdrop-blur-xs flex items-center justify-center">
@@ -86,36 +141,141 @@ export default function AdicionarColaborador({ aberto, aoFechar }) {
         <h2 className="text-xl font-bold mb-4">Adicionar Colaborador</h2>
 
         <div className="grid grid-cols-2 gap-4">
-          <input name="nome_completo" placeholder="Nome Completo" value={formData.nome_completo} onChange={handleChange} className="border p-2 rounded" />
-          <input name="apelido" placeholder="Apelido" value={formData.apelido} onChange={handleChange} className="border p-2 rounded" />
-          <input name="cpf" placeholder="CPF" value={formData.cpf} onChange={handleChange} className="border p-2 rounded" />
-          <input name="cargo" placeholder="Cargo" value={formData.cargo} onChange={handleChange} className="border p-2 rounded" />
-          <input name="setor" placeholder="Setor" value={formData.setor} onChange={handleChange} className="border p-2 rounded" />
-          <input name="vinculo" placeholder="Vínculo" value={formData.vinculo} onChange={handleChange} className="border p-2 rounded" />
-          <input name="matricula" placeholder="Matrícula" value={formData.matricula} onChange={handleChange} className="border p-2 rounded" />
-          <input name="data_admissao" type="date" value={formData.data_admissao} onChange={handleChange} className="border p-2 rounded" />
-          <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-2 rounded" />
-          <input name="telefone" placeholder="Telefone" value={formData.telefone} onChange={handleChange} className="border p-2 rounded" />
-          <input name="cep" placeholder="CEP" value={formData.cep} onChange={handleChange} className="border p-2 rounded" />
-          <input name="endereco" placeholder="Endereço" value={formData.endereco} onChange={handleChange} className="border p-2 rounded" />
-          <input name="complemento" placeholder="Complemento" value={formData.complemento} onChange={handleChange} className="border p-2 rounded" />
-          <input name="municipio" placeholder="Município" value={formData.municipio} onChange={handleChange} className="border p-2 rounded" />
-          <input name="uf" placeholder="UF" value={formData.uf} onChange={handleChange} className="border p-2 rounded" />
+          <input
+            name="nome_completo"
+            placeholder="Nome Completo"
+            value={formData.nome_completo}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="apelido"
+            placeholder="Apelido"
+            value={formData.apelido}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="cpf"
+            placeholder="CPF"
+            value={formData.cpf}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="cargo"
+            placeholder="Cargo"
+            value={formData.cargo}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="matricula"
+            placeholder="Matrícula"
+            value={formData.matricula}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="data_admissao"
+            type="date"
+            value={formData.data_admissao}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="telefone"
+            placeholder="Telefone"
+            value={formData.telefone}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="cep"
+            placeholder="CEP"
+            value={formData.cep}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="endereco"
+            placeholder="Endereço"
+            value={formData.endereco}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="complemento"
+            placeholder="Complemento"
+            value={formData.complemento}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="municipio"
+            placeholder="Município"
+            value={formData.municipio}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            name="uf"
+            placeholder="UF"
+            value={formData.uf}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
         </div>
 
         <div className="flex justify-end mt-6 gap-2">
           <button
-            onClick={aoFechar}
+            onClick={() => {
+              setFormData({
+                // Limpa o formulário
+                nome_completo: "",
+                apelido: "",
+                cpf: "",
+                cargo: "",
+    setor: "construção",
+    vinculo: "1",
+                matricula: "",
+                data_admissao: "",
+                email: "",
+                telefone: "",
+                cep: "",
+                endereco: "",
+                complemento: "",
+                municipio: "",
+                uf: "",
+              });
+              aoFechar();
+            }}
             className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
           >
             Cancelar
           </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Cadastrar
-          </button>
+          {dados ? (
+            <button
+              onClick={updateClient}
+              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Atualizar
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Cadastrar
+            </button>
+          )}
         </div>
       </div>
     </div>
