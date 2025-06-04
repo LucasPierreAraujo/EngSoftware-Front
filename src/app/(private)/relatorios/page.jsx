@@ -9,7 +9,7 @@ import RelatoriosModal from "./modal/relatorios";
 import { reportService } from "@/services/reportService";
 import { useSearchParams } from "next/navigation";
 
-export default function page() {
+function RelatoriosContent() {
   const [showModal, setShowModal] = useState(false);
   const [showOneReportModal, setShowOneReportModal] = useState(null);
   const [draftData, setDraftData] = useState(null);
@@ -122,9 +122,6 @@ export default function page() {
           <span>Adicionar Relatório</span>
         </Button>
 
-        <Button alternative={true} onClick={() => setShowDraft(true)}>
-          <span>Rascunhos</span>
-        </Button>
       </div>
 
       {loading ? (
@@ -227,5 +224,14 @@ export default function page() {
         <RelatoriosModal onClose={() => setShowProblemModal(false)} />
       )}
     </div>
+  );
+}
+
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Carregando relatórios...</div>}>
+      <RelatoriosContent />
+    </Suspense>
   );
 }

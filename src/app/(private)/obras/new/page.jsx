@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { colaboradorService } from "@/services/colaboradorService";
 import { SelectOne } from "@/components/ui/select-one";
 import Loader from '@/components/ui/loader';
+import HeaderObras from "../(components)/header-obras";
 
 export default function Page() {
   const [errors, setErrors] = useState({});
@@ -41,17 +42,18 @@ export default function Page() {
         setIsLoading(false);
       }
     };
-    const fetchClientes = async () => {
-      setIsLoading(true);
-      try {
-        const response = await clienteService.list();
-        setClientes(response);
-      } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+const fetchClientes = async () => {
+  setIsLoading(true);
+  try {
+    const response = await clienteService.list();
+    setClientes(Array.isArray(response) ? response : []);
+  } catch (error) {
+    console.error("Erro ao buscar clientes:", error);
+    setClientes([]); // Garante array mesmo em erro
+  } finally {
+    setIsLoading(false);
+  }
+};
     fetchColaboradores();
     fetchClientes();
   }, []);
@@ -207,7 +209,9 @@ export default function Page() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="h-full">
+    <form onSubmit={handleSubmit} className="h-full px-10">
+            <HeaderObras />
+      
       <div className="flex gap-8 h-full flex-col md:flex-row">
         <div
           id="cardObra"
@@ -265,12 +269,12 @@ export default function Page() {
             name="cliente_id"
             required={true}
             options={[{ value: "novo", name: "Novo Cliente" }].concat(
-              clientes.map((cliente) => {
-                return {
-                  name: cliente.nome,
-                  value: cliente.id,
-                };
-              })
+              Array.isArray(clientes)
+                ? clientes.map((cliente) => ({
+                    name: cliente.nome,
+                    value: cliente.id,
+                  }))
+                : []
             )}
             onChange={(value) => {
               if (value === "novo") {
