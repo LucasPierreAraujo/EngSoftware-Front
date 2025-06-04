@@ -2,17 +2,24 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import AdicionarColaborador from "./(components)/AdicionarColaborador.jsx";
 import { colaboradorService } from "@/services/colaboradorService";
+import Image from "next/image.js";
+import { toast } from "sonner";
 
 export default function EquipePage() {
   const [menuAberto, setMenuAberto] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [colaboradores, setColaboradores] = useState([]);
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
+  const [alertDelet, setAlertDelet] = useState({
+    open: false,
+    id: null,
+  });
+  const menuRef = useRef(null);
 
   // Buscar colaboradores do backend
   useEffect(() => {
@@ -26,6 +33,17 @@ export default function EquipePage() {
     }
 
     fetchColaboradores();
+
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuAberto(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [modalAberto]);
 
   const toggleMenu = (index) => {
@@ -52,18 +70,70 @@ export default function EquipePage() {
       setColaboradores((prev) => prev.filter((colab) => colab.id !== id));
       setMenuAberto(null);
     } catch (error) {
+
+      if(error.statusCode == 409){
+        toast.error("Erro ao excluir colaborador", {
+          description: "Existem tarefas associadas a este colaborador.",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
+      } else {
+        toast.error("Erro ao excluir colaborador", {
+          description: "Erro interno no sistema",
+          style: {
+            backgroundColor: "var(--color-vermelho)",
+          },
+        });
+      }
       console.error("Erro ao excluir colaborador", error);
     }
   };
-
-  async function apagar() {
-    let response = await colaboradorService.deletar(id)
-    setModalAberto(false)
-    console.log(response)
-  }
-
   return (
     <div className="p-6">
+      {alertDelet.open && (
+        <div className="w-screen h-screen fixed top-0 left-0 bg-black/20 backdrop-blur-xs z-50 flex items-center justify-center">
+          <div className="bg-white p-2  gap-2 rounded-2xl border shadow-sm flex items-center justify-center flex-col">
+            <figure>
+              <Image
+                alt="alert"
+                src={"/icons/alert.svg"}
+                width={100}
+                height={100}
+              />
+            </figure>
+            <p className="font-semibold">
+              Realmente deseja deletar esse registro ?
+            </p>
+            <div className="flex gap-2 items-center w-full">
+              <button
+                onClick={() => {
+                  setAlertDelet({
+                    open: false,
+                    id: null,
+                  });
+                }}
+                className="w-full m-auto py-1 rounded-lg cursor-pointer hover:bg-blue-400/80 bg-blue-400"
+              >
+                Estou arrependido
+              </button>
+              <button
+                onClick={() => {
+                  excluirColaborador(alertDelet.id);
+                  setAlertDelet({
+                    open: false,
+                    id: null,
+                  });
+                }}
+                className="w-full m-auto py-1 rounded-lg cursor-pointer hover:bg-red-400/80 bg-red-400"
+              >
+                Pode arrocha!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AdicionarColaborador
         aberto={modalAberto}
         dados={colaboradorSelecionado}
@@ -111,7 +181,7 @@ export default function EquipePage() {
             </button>
             <div>{colab.cargo}</div>
             <div>{colab.setor}</div>
-            <div>{colab.cpf}</div>
+            <div className="">{colab.cpf}</div>
             {/* <div>
               <span
                 className={`px-3 py-1 rounded-full text-sm ${
@@ -123,7 +193,7 @@ export default function EquipePage() {
                 {colab.status}
               </span>
             </div> */}
-            <div className="relative flex justify-end">
+            <div className="relative flex px-5 w-fit justify-start">
               <button
                 onClick={() => toggleMenu(colab.id)}
                 className="p-2 hover:bg-gray-200 rounded-full text-xl font-bold"
@@ -132,7 +202,10 @@ export default function EquipePage() {
               </button>
 
               {menuAberto === colab.id && (
-                <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
+                <div
+                  ref={menuRef}
+                  className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10"
+                >
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
                     onClick={() => {
@@ -144,7 +217,7 @@ export default function EquipePage() {
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => apagar(colab.id)}
+                    onClick={() => setAlertDelet({ open: true, id: colab.id })}
                   >
                     Excluir
                   </button>
