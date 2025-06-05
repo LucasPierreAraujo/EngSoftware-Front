@@ -56,15 +56,15 @@ export const tarefasService = {
       throw error;
     }
   },
-  async updateStatus(id, status_id) {
-    try {
-      let response = await api.patch(`${this.base_url}`, id, { status_id });
-      return response || {};
-    } catch (error) {
-      errorHandler.handle(error);
-      throw error;
-    }
-  },
+async updateStatus(id, data) {
+  try {
+    const response = await api.patch(`${this.base_url}/${id}`, data);
+    return response || {};
+  } catch (error) {
+    errorHandler.handle(error);
+    throw error;
+  }
+},  
   async iniciar(id) {
     try {
       const response = await api.patchByUrl(this.base_url, id, "iniciar");
@@ -77,6 +77,16 @@ export const tarefasService = {
   async concluir(id) {
     try {
       const response = await api.patchByUrl(this.base_url, id, "concluir");
+      return response || {};
+    } catch (error) {
+      errorHandler.handle(error);
+      throw error;
+    }
+  },
+
+    async pendente(id) {
+    try {
+      const response = await api.patchByUrl(this.base_url, id, "pendente");
       return response || {};
     } catch (error) {
       errorHandler.handle(error);

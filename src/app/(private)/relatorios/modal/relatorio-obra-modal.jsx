@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
 import { SelectOne } from "@/components/ui/select-one";
 import { TextArea } from "@/components/ui/text-area";
+import { colaboradorService } from "@/services/colaboradorService";
 import { obrasService } from "@/services/obrasService";
 import { reportService } from "@/services/reportService";
 import Image from "next/image";
@@ -33,9 +34,8 @@ export default function RelatorioObraModal({ onClose, draft, report = null }) {
   const [errors, setErrors] = useState({});
 
   const [listObra, setListObra] = useState([]);
-  const [listResponsavel, setListResponsavel] = useState([
-    { value: 1, name: "Usuário padrão" },
-  ]);
+
+  const [listResponsavel, setListResponsavel] = useState([]);
 
   const climaOptions = [
     { value: 1, name: "frio" },
@@ -53,8 +53,24 @@ export default function RelatorioObraModal({ onClose, draft, report = null }) {
     setListObra(option);
   }
 
+      const fetchResponsaveis = async () => {
+      try {
+        let response = await colaboradorService.listar();
+        console.log({"response get colaboradores": response})
+        const options = response.map((item) => ({
+          value: item.id,
+          name: item.apelido,
+        }));
+        console.log({"options colaboradores": options})
+        setListResponsavel(options);
+      } catch (error) {
+        console.error("Erro ao buscar responsáveis:", error);
+      }
+    }
+
   useEffect(() => {
     fecthObra();
+    fetchResponsaveis()
 
     if (draft) {
       setData(draft.data || "");
@@ -86,6 +102,9 @@ export default function RelatorioObraModal({ onClose, draft, report = null }) {
       setTempo(report.tempo_climatico || "");
       setObra(report.obra.id);
     }
+
+
+
   }, []);
 
   console.log({idObra: obra})

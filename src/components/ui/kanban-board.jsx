@@ -27,7 +27,6 @@ const statusMapping = {
   1: "Pendente",
   2: "Em Andamento",
   3: "Concluída",
-  4: "Arquivada",
 };
 
 function formatDate(dateStr) {
@@ -38,7 +37,7 @@ function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-export default function KanbanBoard({ etapa_id }) {
+export default function KanbanBoard({ etapa_id, openModal }) {
   const [showModal, setShowModal] = useState(false);
   const [targetColumn, setTargetColumn] = useState(null);
   const [activeId, setActiveId] = useState(null);
@@ -136,8 +135,7 @@ export default function KanbanBoard({ etapa_id }) {
       } else if (toColumnId == "3") {
         await tarefasService.concluir(activeId);
       } else {
-        console.log("Tarefa movida para coluna:", statusMapping[toColumnId]);
-        await tarefasService.update(activeId, { status_id: toColumnId });
+        await tarefasService.pendente(activeId);
       }
     } catch (error) {
       toast.error("Erro ao atualizar o status da tarefa!", {

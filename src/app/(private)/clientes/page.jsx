@@ -57,7 +57,6 @@ export default function page() {
                     <th className="p-4 font-bold text-sm">CLIENTE</th>
                     <th className="p-4 font-bold text-sm">TELEFONE</th>
                     <th className="p-4 font-bold text-sm">ENDEREÇO</th>
-                    <th className="p-4 font-bold text-sm">CIDADE</th>
                     <th className="p-4 font-bold text-sm">AÇÕES</th>
                   </tr>
                 </thead>
@@ -66,7 +65,6 @@ export default function page() {
                     <tr key={cliente.id} className="border-t">
                       <td className="p-4 text-sm">{cliente.nome}</td>
                       <td className="p-4 text-sm">{cliente.telefone}</td>
-                      <td className="p-4 text-sm">{cliente.endereco}</td>
                       <td className="p-4 text-sm">{cliente.cidade}</td>
                       <td className="p-4 text-sm">
                         <button className="text-xl px-2 py-1">...</button>

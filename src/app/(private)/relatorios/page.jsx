@@ -145,6 +145,7 @@ export default function page() {
               </thead>
               <tbody className="">
                 {data.data.map((item) => {
+                  console.log(item);
                   return (
                     <tr key={item.id} className=" odd:bg-white hover:odd:bg-gray-100 even:bg-[#E2E8F0] hover:bg-[#E2E8F0]/80">
                       <td className="p-1 text-sm">{item.data_do_registro}</td>
