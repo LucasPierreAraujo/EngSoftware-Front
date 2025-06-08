@@ -25,6 +25,17 @@ export default function ModalCadastro({ isOpen, onClose }) {
   const [telefone, setTelefone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Estados para validação visual dos campos
+  const [validatedFields, setValidatedFields] = useState({
+    cpfCnpj: null,
+    nome: null,
+    email: null,
+    telefone: null,
+    senha: null,
+    confirmeSenha: null,
+    cargo: null,
+  });
+
   function capitalizeFirstLetter(text) {
     return text
       .toLowerCase()
@@ -48,6 +59,104 @@ export default function ModalCadastro({ isOpen, onClose }) {
     }
   }
 
+  function formatTelefone(value) {
+    value = value.replace(/\D/g, "");
+    value = value.slice(0, 11);
+    if (value.length > 6) {
+      return `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+    } else if (value.length > 2) {
+      return `(${value.slice(0, 2)}) ${value.slice(2)}`;
+    } else if (value.length > 0) {
+      return `(${value}`;
+    }
+    return "";
+  }
+
+  // Validação avançada de nome
+  function isNomeValido(nome) {
+    const nomeLimpo = nome.trim().replace(/\s+/g, " ");
+    const palavras = nomeLimpo.split(" ");
+
+    // Pelo menos 2 palavras
+    if (palavras.length < 2) return false;
+
+    // Cada palavra com pelo menos 2 letras e sem repetição de uma letra só
+    for (const palavra of palavras) {
+      if (palavra.length < 2) return false;
+      if (/^([a-zA-ZÀ-ÖØ-öø-ÿ])\1+$/.test(palavra)) return false;
+    }
+
+    // Não pode ser só consoantes ou só vogais
+    const soLetras = nomeLimpo.replace(/\s/g, "");
+    if (/^[bcdfghjklmnpqrstvwxyz]+$/i.test(soLetras)) return false;
+    if (/^[aeiou]+$/i.test(soLetras)) return false;
+
+    return true;
+  }
+
+  // Handlers com validação visual
+  function handleCpfCnpjChange(e) {
+    const value = formatCpfCnpj(e);
+    setCpfCnpj(value);
+    const cleaned = value.replace(/\D/g, "");
+    setValidatedFields((prev) => ({
+      ...prev,
+      cpfCnpj: cleaned.length === 11 || cleaned.length === 14 ? true : false,
+    }));
+  }
+
+  function handleNomeChange(e) {
+    const value = capitalizeFirstLetter(e.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, ""));
+    setNome(value);
+    setValidatedFields((prev) => ({
+      ...prev,
+      nome: isNomeValido(value),
+    }));
+  }
+
+  function handleEmailChange(e) {
+    setEmail(e);
+    setValidatedFields((prev) => ({
+      ...prev,
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e),
+    }));
+  }
+
+  function handleTelefoneChange(e) {
+    const formatted = formatTelefone(e);
+    setTelefone(formatted);
+    const cleaned = formatted.replace(/\D/g, "");
+    setValidatedFields((prev) => ({
+      ...prev,
+      telefone: cleaned.length === 11,
+    }));
+  }
+
+  function handleSenhaChange(e) {
+    setSenha(e);
+    setValidatedFields((prev) => ({
+      ...prev,
+      senha: e.length >= 8,
+    }));
+  }
+
+  function handleConfirmeSenhaChange(e) {
+    setConfirmeSenha(e);
+    setValidatedFields((prev) => ({
+      ...prev,
+      confirmeSenha: e === senha && e.length >= 8,
+    }));
+  }
+
+  function handleCargoChange(e) {
+    const value = capitalizeFirstLetter(e);
+    setCargo(value);
+    setValidatedFields((prev) => ({
+      ...prev,
+      cargo: !!value,
+    }));
+  }
+
   function validateForm() {
     disableErrorMessage();
 
@@ -60,10 +169,10 @@ export default function ModalCadastro({ isOpen, onClose }) {
       return false;
     }
 
-    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(nome)) {
+    if (!isNomeValido(nome)) {
       updateErrorMessage({
         title: "nome",
-        message: "O nome deve conter apenas letras.",
+        message: "Digite seu nome completo e válido.",
       });
       return false;
     }
@@ -73,6 +182,16 @@ export default function ModalCadastro({ isOpen, onClose }) {
       updateErrorMessage({
         title: "email",
         message: "Formato de e-mail inválido.",
+      });
+      return false;
+    }
+
+    // Validação do telefone
+    const cleanedTelefone = telefone.replace(/\D/g, "");
+    if (cleanedTelefone.length !== 11) {
+      updateErrorMessage({
+        title: "telefone",
+        message: "O telefone deve ter 11 dígitos (incluindo DDD).",
       });
       return false;
     }
@@ -124,29 +243,12 @@ export default function ModalCadastro({ isOpen, onClose }) {
         title: "formato",
         message: "Erro ao formatar os dados. Verifique os campos.",
       });
-      // if(response.status == 422){
-      //   const data = await response.json();
-      //   if(data.errors?.email){
-
-      //     return updateErrorMessage({
-      //       title: "email",
-      //       message: "Este email já está cadastrado"
-      //     });
-      //   }
-
-      //   if(data.errors?.phone){
-
-      //     return updateErrorMessage({
-      //       title: "telefone",
-      //       message: "Este telefone já está cadastrado"
-      //     });
-      //   }
-      // }
     } finally {
       setIsLoading(false);
     }
     onClose();
   }
+
   if (isLoading) {
     return <Loader />;
   }
@@ -161,58 +263,68 @@ export default function ModalCadastro({ isOpen, onClose }) {
         label="CPF ou CNPJ"
         type="text"
         value={cpfCnpj}
-        onChange={(e) => setCpfCnpj(formatCpfCnpj(e))}
+        onChange={handleCpfCnpjChange}
         placeholder="Digite seu CPF ou CNPJ"
         error={errorMessage?.title === "cpfCnpj" ? errorMessage.message : null}
+        success={validatedFields.cpfCnpj === true}
+        errorBorder={validatedFields.cpfCnpj === false}
       />
 
       <InputField
         label="Nome"
         type="text"
         value={nome}
-        onChange={(e) =>
-          setNome(capitalizeFirstLetter(e.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, "")))
-        }
+        onChange={handleNomeChange}
         placeholder="Digite seu nome completo"
         error={errorMessage?.title === "nome" ? errorMessage.message : null}
+        success={validatedFields.nome === true}
+        errorBorder={validatedFields.nome === false}
       />
 
       <InputField
         label="Email"
         type="email"
         value={email}
-        onChange={(e) => setEmail(e)}
+        onChange={handleEmailChange}
         placeholder="usuario@email.com"
         error={errorMessage?.title === "email" ? errorMessage.message : null}
+        success={validatedFields.email === true}
+        errorBorder={validatedFields.email === false}
       />
 
       <InputField
         label="Telefone"
         type="text"
         value={telefone}
-        onChange={(e) => setTelefone(e)}
+        onChange={handleTelefoneChange}
         placeholder="Digite seu telefone"
         error={errorMessage?.title === "telefone" ? errorMessage.message : null}
+        success={validatedFields.telefone === true}
+        errorBorder={validatedFields.telefone === false}
       />
 
       <InputField
         label="Senha"
         type="password"
         value={senha}
-        onChange={(e) => setSenha(e)}
+        onChange={handleSenhaChange}
         placeholder="Digite sua senha"
         error={errorMessage?.title === "senha" ? errorMessage.message : null}
+        success={validatedFields.senha === true}
+        errorBorder={validatedFields.senha === false}
       />
 
       <InputField
         label="Confirme sua senha"
         type="password"
         value={confirmeSenha}
-        onChange={(e) => setConfirmeSenha(e)}
+        onChange={handleConfirmeSenhaChange}
         placeholder="Confirme sua senha"
         error={
           errorMessage?.title === "confirmeSenha" ? errorMessage.message : null
         }
+        success={validatedFields.confirmeSenha === true}
+        errorBorder={validatedFields.confirmeSenha === false}
       />
 
       <SelectOne
@@ -228,9 +340,10 @@ export default function ModalCadastro({ isOpen, onClose }) {
           },
         ]}
         value={cargo}
-        onChange={(e) => setCargo(capitalizeFirstLetter(e))}
+        onChange={handleCargoChange}
         placeholder="Digite seu cargo"
-        // error={errorMessage?.title === "cargo" ? errorMessage.message : null}
+        success={validatedFields.cargo === true}
+        errorBorder={validatedFields.cargo === false}
       />
 
       <Button

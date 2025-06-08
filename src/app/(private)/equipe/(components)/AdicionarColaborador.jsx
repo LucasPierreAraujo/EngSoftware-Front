@@ -49,15 +49,80 @@ export default function AdicionarColaborador({
     }
   }, [dados]);
 
+  function maskCep(value) {
+    value = value.replace(/\D/g, "").slice(0, 8);
+    if (value.length > 5) {
+      return value.replace(/^(\d{5})(\d{1,3})/, "$1-$2");
+    }
+    return value;
+  }
+
+  function validateCep(value) {
+    const cleaned = value.replace(/\D/g, "");
+    return cleaned.length === 8;
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "cep") {
+      const masked = maskCep(value);
+      setFormData((prev) => ({ ...prev, cep: masked }));
+      // Não precisa mais do setCepError aqui, pois a cor será controlada pelo estado do input
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateCep(formData.cep)) {
+      toast.error("CEP inválido. Deve conter 8 dígitos.");
+      return;
+    }
+    try {
+      let response = await colaboradorService.adicionar(formData);
+      toast.success("Colaborador cadastrado com sucesso!");
+      aoFechar();
+      setFormData({
+        nome_completo: "",
+        apelido: "",
+        cpf: "",
+        cargo: "",
+        setor: "construção",
+        vinculo: "1",
+        matricula: "",
+        data_admissao: "",
+        email: "",
+        telefone: "",
+        cep: "",
+        endereco: "",
+        complemento: "",
+        municipio: "",
+        uf: "",
+      });
+    } catch (error) {
+      console.error("Erro ao cadastrar colaborador:", error);
+      toast.error(error.message, {
+        description: "Erro ao cadsatrar colaborador",
+        style: {
+          backgroundColor: "var(--color-vermelho)",
+        },
+      });
+    }
+  };
+
   function updateClient() {
     const { id } = dados;
+    if (!validateCep(formData.cep)) {
+      toast.error("CEP inválido. Deve conter 8 dígitos.");
+      return;
+    }
     colaboradorService
       .atualizar(id, formData)
       .then(() => {
         toast.success("Colaborador atualizado com sucesso!");
-        aoFechar(); // Fecha o modal
+        aoFechar();
         setFormData({
-          // Limpa o formulário
           nome_completo: "",
           apelido: "",
           cpf: "",
@@ -85,53 +150,6 @@ export default function AdicionarColaborador({
         });
       });
   }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async () => {
-    try {
-      let response = await colaboradorService.adicionar(formData);
-      // response = await response.json();
-      // if(response.data?.error){
-      //   response.data.error.cpf ? alert("CPF inválido") : null;
-      //   response.data.error.nome_completo ? alert("Nome inválido") : null;
-      //   response.data.error.telefone ? alert("Telefone inválido") : null;
-      //   response.data.error.endereco ? alert("Endereço inválido") : null;
-      //   return alert("Reveja suas atidudes");
-      // }
-      toast.success("Colaborador cadastrado com sucesso!");
-      aoFechar(); // Fecha o modal
-      setFormData({
-        // Limpa o formulário
-        nome_completo: "",
-        apelido: "",
-        cpf: "",
-        cargo: "",
-        setor: "construção",
-        vinculo: "1",
-        matricula: "",
-        data_admissao: "",
-        email: "",
-        telefone: "",
-        cep: "",
-        endereco: "",
-        complemento: "",
-        municipio: "",
-        uf: "",
-      });
-    } catch (error) {
-      console.error("Erro ao cadastrar colaborador:", error);
-      toast.error(error.message, {
-        description: "Erro ao cadsatrar colaborador",
-        style: {
-          backgroundColor: "var(--color-vermelho)",
-        },
-      });
-    }
-  };
 
   if (!aberto) return null;
 
@@ -197,13 +215,28 @@ export default function AdicionarColaborador({
             onChange={handleChange}
             className="border p-2 rounded"
           />
-          <input
-            name="cep"
-            placeholder="CEP"
-            value={formData.cep}
-            onChange={handleChange}
-            className="border p-2 rounded"
-          />
+          <div className="col-span-2">
+            <input
+              name="cep"
+              placeholder="CEP"
+              value={formData.cep}
+              onChange={handleChange}
+              className={`border p-2 rounded w-full
+                ${
+                  formData.cep.length > 0 && !validateCep(formData.cep)
+                    ? "border-red-500"
+                    : ""
+                }
+                ${validateCep(formData.cep) ? "border-green-500" : ""}
+              `}
+              maxLength={9}
+            />
+            {formData.cep.length > 0 && !validateCep(formData.cep) && (
+              <span className="text-red-500 text-xs">
+                CEP inválido. Deve conter 8 dígitos.
+              </span>
+            )}
+          </div>
           <input
             name="endereco"
             placeholder="Endereço"
@@ -238,13 +271,12 @@ export default function AdicionarColaborador({
           <button
             onClick={() => {
               setFormData({
-                // Limpa o formulário
                 nome_completo: "",
                 apelido: "",
                 cpf: "",
                 cargo: "",
-    setor: "construção",
-    vinculo: "1",
+                setor: "construção",
+                vinculo: "1",
                 matricula: "",
                 data_admissao: "",
                 email: "",
